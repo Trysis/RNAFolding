@@ -3,26 +3,56 @@
 import os
 import argparse
 
+from tensorflow import keras
+
+# Local modules
+import model
+
 SELECT_OPTIMIZERS = {
-    "adam": "",
-    "rmsprop": "",
-    "sgd": ""
+    "adam": keras.optimizers.Adam,
+    "rmsprop": keras.optimizers.RMSprop,
+    "sgd": keras.optimizers.SGD
 }
-def train_model(model, X, Y, X_val=None, Y_val=None,
+
+SELECT_MODELS = {
+    "simple_lstm": model.simple_lstm()
+}
+
+def load_model(model,
+               optimizer=None, learning_rate=None, loss_fn=None,
+               l1=None, l2=None, dropout=None
+):
+    """
+    This function will return a model based on the
+    specified file/name.
+
+    model: str
+        Path to an existing model, or
+        model name present in global variable {MODELS}
+    """
+    selected_model = None
+    if os.path.isfile(model):
+        pass
+    else:
+
+
+def train_model(model, x_train, y_train,x_val=None, y_val=None,
                 epochs=10, batch_size=256, 
-                saveto=None, **kwargs
+                optimizer=None, learning_rate=None, loss_fn=None,
+                l1=None, l2=None, dropout=None,
+                save_to=None, save_md_to=None, **kwargs
 ):
     """"""
+    save_format = kwargs.get("save_format", "tf")
     XY_val = None if X_val is None and Y_val is None else \
             (X_val, Y_val)
 
     history = model.fit(X, Y, validation_data=XY_val, batch_size=batch_size, epochs=epochs, **kwargs)
-    if saveto is not None:
-        if os.path.isdir(saveto):
-            model.save(saveto)
-    
-    return history
+    if save_md_to is not None:
+        if os.path.isdir(save_md_to):
+            model.save(save_md_to, save_format=save_format)
 
+    return history
 
 
 if __name__ == "__main__":
