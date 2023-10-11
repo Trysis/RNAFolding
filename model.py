@@ -4,7 +4,7 @@ import keras
 import auxiliary as aux
 
 
-def simple_lstm():
+def simple_lstm(**kwargs):
     model = keras.Sequential([
         keras.layers.Input(shape=(457, 4)),
         keras.layers.LSTM(units=8, return_sequences=True),

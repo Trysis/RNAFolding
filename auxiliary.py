@@ -27,11 +27,12 @@ def append_suffix(filepath, path_sep="/", suffix_sep="_"):
     if not os.path.isfile(filepath):
         return filepath
     # Else we append a suffix
-    filename = os.path.basename(filepath)
+    dirname = os.path.dirname(filepath)  # directory name
+    filename = os.path.basename(filepath)  # file name
     root, ext = os.path.splitext(filename)
+    # Match files with the same pattern as ours
     pattern_file = re.compile(root + suffix_sep + "[0-9]+" + "[.]" + ext)
-    pattern_begin = re.compile("\d")
-    pattern_end = re.compile("\.")
+    pattern_begin, pattern_end = re.compile("\d"), re.compile("\.")
     matched_file = [pattern_file.search(filename).group(0) for filename in filename]
     matched_suffix = [filename[pattern_begin.search(filename):pattern_end.search(filename)] \
                      for filename in matched_file]
