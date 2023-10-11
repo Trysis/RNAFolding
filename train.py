@@ -11,32 +11,43 @@ import model
 SELECT_OPTIMIZERS = {
     "adam": keras.optimizers.Adam,
     "rmsprop": keras.optimizers.RMSprop,
-    "sgd": keras.optimizers.SGD
+    "sgd": keras.optimizers.SGD,
 }
 
 SELECT_MODELS = {
-    "simple_lstm": model.simple_lstm()
+    "simple_lstm": model.simple_lstm,
 }
 
-def load_model(model,
+def load_model(model_link, hidden_units=None,
                optimizer=None, learning_rate=None, loss_fn=None,
-               l1=None, l2=None, dropout=None
+               l1=None, l2=None, dropout=None, **kwargs
 ):
-    """
-    This function will return a model based on the
-    specified file/name.
+    """This function will return a model based on the
+        specified file/name.
 
     model: str
         Path to an existing model, or
         model name present in global variable {MODELS}
     """
     selected_model = None
-    if os.path.isfile(model):
-        pass
+    if os.path.isfile(model_link):
+        model = keras.saving.load_model(model_link)
     else:
+        model = SELECT_MODELS[model_link]
+        model = model(hidden_units=hidden_units,
+                      l1=l1, l2=l2, dropout=dropout,
+                      **kwargs)
+    
+    if optimizer is not None and loss_fn is not None:
+        optimizer_fn = optimizer(**kwargs) if learning_rate is None else \
+                    optimizer(learning_rate=learning_rate, **kwars)
+
+        model.compile(optimizer=optimizer_fn, loss=loss_fn)
+    
+    return model
 
 
-def train_model(model, x_train, y_train,x_val=None, y_val=None,
+def train_model(model, x_train, y_train, x_val=None, y_val=None,
                 epochs=10, batch_size=256, 
                 optimizer=None, learning_rate=None, loss_fn=None,
                 l1=None, l2=None, dropout=None,
