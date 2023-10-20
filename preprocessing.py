@@ -1,11 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# DATA PREPROCESSING FILE
-
-# In[12]:
-
-
 import re
 import pandas as pd
 import numpy as np
@@ -19,23 +14,13 @@ from tensorflow.keras.layers import LSTM, Dense, Masking, Reshape
 from sklearn.model_selection import train_test_split
 from scipy.sparse import hstack
 
-
-# In[13]:
-
-
-#Define constant 
-
+# Constantes
 RNA_BASES = [["A"], ["U"], ["C"], ["G"]]
 encoder = OneHotEncoder(handle_unknown='ignore', sparse_output=False).fit(RNA_BASES)
 
 
-# In[14]:
-
-
 def load_data(file_path) :
-    
-    """
-    Load data from a CSV file.
+    """Load data from a CSV file.
 
     Parameters:
     - file_path (str): The path to the CSV file containing the data.
@@ -43,21 +28,15 @@ def load_data(file_path) :
     Returns:
     - data(DataFrame): A Pandas DataFrame containing the loaded data.
     """
-    file_path = input("Enter your file path:")
     data = pd.read.csv(file_path)
     return data
 
 
-# In[15]:
-
-
 def filter_SN(data):
-    
-    """ 
-    Filter the rows where "SN_filter" is equal to 1 
+    """Filter the rows where "SN_filter" is equal to 1 
        
     Parameters :
-    -data(DataFrame) : A pandas Dataframe containing the input data
+    - data (DataFrame) : A pandas Dataframe containing the input data
     
     Returns :
     - cleaned_train_data(DataFrame) : A dataframe containing only the sequences that passed the SN_filter 
@@ -66,32 +45,22 @@ def filter_SN(data):
     return cleaned_train_data
 
 
-# In[16]:
-
-
 def filter_identical_sequences(data):
-    
-    """
-    For identical sequences keep rows with maximum signal to noise
-    
+    """For identical sequences keep rows with maximum signal to noise
+
     Parameters:
-    -data (DataFrame) : pandas input dataframe
-    
+    - data (DataFrame) : pandas input dataframe
+
     Returns :
-    -filtered_df(Dataframe) : a filtered dataframe with the sequences with a maximum signal to noise
+    - filtered_df(Dataframe) : a filtered dataframe with the sequences with a maximum signal to noise
+
     """
-    
     filtered_df = cleaned_train_data.groupby('sequence').apply(lambda x: x.loc[x['signal_to_noise'].idxmax()])
     return filtered_df
 
 
-# In[17]:
-
-
 def columns_defining(cleaned_train_data) :
-    
-    """
-    Define the X and Y columns
+    """Define the X and Y columns
     
     Parameters:
     -cleaned_trained_data (Dataframe) : pandas dataframe input
@@ -101,14 +70,10 @@ def columns_defining(cleaned_train_data) :
     -y_columns(list) : column names for Y
     -conditional_columns(list) : continonal columns for the whole dataset
     """
-    
     x_columns = ["sequence_id", "sequence"]
     conditional_columns = ["experiment_type", "signal_to_noise"]
     y_columns = [colname for colname in cleared_train_data.columns if re.match("^reactivity_[0-9]{4}$", colname)]
     return x_columns, y_columns, conditional_columns
-
-
-# In[18]:
 
 
 def column_filtering(cleaned_train_data, x_columns, y_columns, conditional_columns) :
