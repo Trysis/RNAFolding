@@ -9,6 +9,7 @@ from tensorflow import keras
 
 # Local modules
 import model
+import loss
 import auxiliary
 
 # Constantes
@@ -22,6 +23,9 @@ SELECT_MODELS = {
     "simple_lstm": model.simple_lstm,
 }
 
+SELECT_LOSS = {
+    "masked_loss": loss.masked_loss_fn
+}
 
 def load_model(model_link,
                optimizer=None, learning_rate=None, loss_fn=None,
@@ -89,11 +93,13 @@ def load_model(model_link,
 
     # Set parameters if defined
     if optimizer is not None and loss_fn is not None:
+        # Change optimizer with attributed loss function
         optimizer_fn = optimizer(**kwargs) if learning_rate is None else \
                     optimizer(learning_rate=learning_rate, **kwars)
 
         model.compile(optimizer=optimizer_fn, loss=loss_fn, **kwargs)
     elif optimizer is not None and learning_rate is not None:
+        # Only change learning rate
         backend.set_value(model.optimizer.learning_rate, learning_rate)
 
     return model_name, model
@@ -178,10 +184,15 @@ def train_model(model_link, x_train, y_train, x_val=None, y_val=None,
                                    )
 
     save_format = kwargs.get("save_format", "tf")
-    XY_val = None if X_val is None and Y_val is None else \
+    XY_val = None if x_val is None and y_val is None else \
             (X_val, Y_val)
 
-    history = model.fit(X, Y, validation_data=XY_val, batch_size=batch_size, epochs=epochs, **kwargs)
+    history = model.fit(x_train, y_train,
+                        validation_data=XY_val,
+                        batch_size=batch_size,
+                        epochs=epochs,
+                        **kwargs)
+
     if save_md_to is not None:
         if os.path.isdir(save_md_to):
             model.save(save_md_to, save_format=save_format)
@@ -201,15 +212,15 @@ if __name__ == "__main__":
     parser.add_argument('model', type=str, help="File path to saved model file.")
     parser.add_argument('x_train', nargs='?', type=str, default="./data/X_train.npy", help="File path to X train file.")
     parser.add_argument('y_train', nargs='?', type=str, default="./data/Y_train.npy", help="File path to Y train file.")
-    parser.add_argument('-xv', '--x_val', nargs='?', type=str, default="./data/X_val.npy", help="File path to X validation binary numpy file.")
-    parser.add_argument('-yv', '--y_val', nargs='?', type=str, default="./data/Y_val.npy", help="File path to Y validation binary numpy file.")
-    # Fitting parameters
+    parser.add_argument('-xv', '--x_val', nargs='?', type=str, default=None, help="File path to X validation binary numpy file.")
+    parser.add_argument('-yv', '--y_val', nargs='?', type=str, default=None, help="File path to Y validation binary numpy file.")
+    # Fitting parameters (default values)
     parser.add_argument('-e', '--epochs', type=int, default=10, help="number of epochs to perform")
     parser.add_argument('-b', '--batch', type=int, default=256, help="batch size during training")
     # Optimizer args (optional)
     parser.add_argument('-opt', '--optimizer', type=str.lower, default=None, choices=SELECT_OPTIMIZERS.keys(), help="chosen optimizer")
     parser.add_argument('-lr', '--learning_rate', type=float, default=None, help="chosen learning rate (if opt is set)")
-    parser.add_argument('-lf', '--loss_function', type=float, default=None, help="chosen loss function (if opt is set)")
+    parser.add_argument('-lf', '--loss_function', type=float, default=loss.masked_loss_fn, help="chosen loss function (if opt is set)")
     # Model specification, name and model architecture size (optional)
     parser.add_argument('-m', '--model_name', type=str, default="unknown", help="chosen name for the model")
     parser.add_argument('-s', '--hidden_size', type=int, default=None, help="Hidden units for a model taking this arg")
@@ -217,7 +228,7 @@ if __name__ == "__main__":
     parser.add_argument('-1', '--regl1', type=float, default=0.0, help="l1 regularization factor")
     parser.add_argument('-2', '--regl2', type=float, default=0.0, help="l2 regularization factor")
     parser.add_argument('-d', '--dropout', type=float, default=0.0, help="dropout regularization value")
-    # Output paths
+    # Output paths (default values)
     parser.add_argument('-o', '--model_output', type=str, default="./out/", help="output directory for the model")
     parser.add_argument('-g', '--graph_output', type=str, default="./out/", help="output directory for the plots")
     parser.add_argument('-w', '--overwrite', action='store_false', help="should we overwrite model after training ?")
@@ -230,6 +241,9 @@ if __name__ == "__main__":
     y_train_path = args.y_train
     x_val_path = args.x_val
     y_val_path = args.y_val
+    # -- Model name & architecture (a bit)
+    model_name = args.model_name
+    hidden_size = args.hidden_size
     # -- Fitting parameters
     epochs = args.epochs
     batch_size = args.batch
@@ -241,9 +255,6 @@ if __name__ == "__main__":
     l1 = args.regl1
     l2 = args.regl2
     dropout = args.dropout
-    # -- 
-    model_name = args.model_name
-    hidden_size = args.hidden_size
     # -- Output directory & Write attribute
     output_model_dir = args.model_output
     output_graph_dir = args.graph_output
@@ -271,25 +282,33 @@ if __name__ == "__main__":
 
     if epochs <= 0:
         raise Exception("epochs value should be positive (>=0)")
+
     if batch_size < 1:
         batch_size = None
+
     if optimizer is None:
         loss_fn = None
+
     if l1 < 0:
         raise Exception("l1 regularization should be positive")
+
     if l2 < 0:
         raise Exception("l2 regularization should be positive")
+
     if dropout < 0:
         raise Exception("dropout value should be positive")
+
     if not auxiliary.isdir(output_model_dir):
         raise Exception("Ouput directory for the model is invalid")
+
     if not auxiliary.isdir(output_graph_dir):
         raise Exception("Output directory for the graphical output is invalid")
+
     if not model_name.isalnum():
         raise Exception("Invalid model name, it should be a str containings only "
                         "alphanumerical characters")
 
-    print(f"{overwrite = }")
+    # Model training
     train_model(model_link,
                 *auxiliary.load_data(x_train_path, y_train_path),
                 *auxiliary.load_data(x_val_path, y_val_path),
@@ -298,9 +317,10 @@ if __name__ == "__main__":
                 overwrite=overwrite,
                 epochs=epochs,
                 batch_size=batch_size,
-                optimizer=optimizer,
+                optimizer=SELECT_OPTIMIZERS[optimizer],
                 learning_rate=learning_rate,
                 loss_fn=loss_fn,
+                hidden_size=hidden_size,
                 l1=l1,
                 l2=l2,
                 dropout=dropout

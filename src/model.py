@@ -4,13 +4,20 @@ import keras
 import auxiliary as aux
 
 
-def simple_lstm(input_size=(457, 4), hidden_size=32, **kwargs):
+def simple_lstm(input_size=(457, 4), output_size=(2), to_compile=True, **kwargs):
     """Simple lstm"""
+    hidden_size = kwargs.get("hidden_size")
+    hidden_size = 32 if hidden_size is None else hidden_size
+    # Model
     model = keras.Sequential([
         keras.layers.Input(shape=input_size),
         keras.layers.LSTM(units=hidden_size, return_sequences=True),
-        keras.layers.Dense(units=2, activation='linear')
+        keras.layers.Dense(units=output_size, activation='linear')
     ])
+    # BackPropagation algorithm and lr
+    if to_compile:
+        pass
+
     return model
 
 

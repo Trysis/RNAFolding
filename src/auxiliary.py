@@ -3,6 +3,8 @@ import os
 # Pattern matching
 import re
 
+import numpy as np
+
 
 def isfile(filepath):
     """Checks if {filepath} is a valid path to file."""
