@@ -23,6 +23,7 @@ def set_optimizer(model, optimizer, loss):
 def save_model(model, dirpath="", dir_sep="/", filename="model", ext="keras"):
     if not aux.isdir(dirpath):
         raise Exception("Dirpath is invalid")
+
     # Save model with attributed extension
     dirpath = aux.to_dirpath(dirpath, dir_sep=dir_sep)
     filename_ext = aux.replace_extension(filename, ext)

@@ -25,7 +25,7 @@ SELECT_MODELS = {
 
 def load_model(model_link,
                optimizer=None, learning_rate=None, loss_fn=None,
-               hidden_units=None, l1=None, l2=None, dropout=None,
+               hidden_size=None, l1=None, l2=None, dropout=None,
                **kwargs
 ):
     """This function will return a model based on the
@@ -47,25 +47,25 @@ def load_model(model_link,
     loss_fn: keras.loss.* or str or <class 'function'> (optional)
         Loss function
 
-    hidden_units: int (optional)
+    hidden_size: int (optional)
         Correspond to the number of hidden units for the
         model. This is useful when the model is chosen by
         name in the {MODELS} variable, specifying a model
-        function taking as argument hidden_units for easier
+        function taking as argument hidden_size for easier
         parametrization.
 
     l1, l2: float, float (optional)
         l1 and l2 regularization values for the model.
         This is useful when the model is chosen by
         name in the {MODELS} variable, specifying a model
-        function taking as argument hidden_units for easier
+        function taking as argument hidden_size for easier
         parametrization.
 
     dropout: float (optional)
         Dropout regularization value for the model.
         This is useful when the model is chosen by
         name in the {MODELS} variable, specifying a model
-        function taking as argument hidden_units for easier
+        function taking as argument hidden_size for easier
         parametrization.
 
     Returns: keras.model
@@ -82,7 +82,7 @@ def load_model(model_link,
         # Create a model from zero, by selecting by name
         # the specified model in {SELECT_MODELS} global variable
         model = SELECT_MODELS.get(model_link, None)
-        model = model(hidden_units=hidden_units,
+        model = model(hidden_size=hidden_size,
                       l1=l1, l2=l2, dropout=dropout,
                       **kwargs)
         model_name = model_link + ".keras"
@@ -100,10 +100,10 @@ def load_model(model_link,
 
 
 def train_model(model_link, x_train, y_train, x_val=None, y_val=None,
-                save_to=None, save_md_to=None, overwrite=True,
+                save_graph_to=None, save_md_to=None, overwrite=True,
                 epochs=None, batch_size=None, 
                 optimizer=None, learning_rate=None, loss_fn=None,
-                hidden_units=None, l1=None, l2=None, dropout=None,
+                hidden_size=None, l1=None, l2=None, dropout=None,
                 **kwargs
 ):
     """This function will return a model based on the
@@ -124,7 +124,7 @@ def train_model(model_link, x_train, y_train, x_val=None, y_val=None,
         X and Y validaiton sets for the model prediction
         validatinon.
 
-    save_to: str (optional)
+    save_graph_to: str (optional)
         Output directory to plot the model output
 
     save_md_to: str (optional)
@@ -145,30 +145,30 @@ def train_model(model_link, x_train, y_train, x_val=None, y_val=None,
     loss_fn: keras.loss.* or str or <class 'function'> (optional)
         Loss function
 
-    hidden_units: int (optional)
+    hidden_size: int (optional)
         Correspond to the number of hidden units for the
         model. This is useful when the model is chosen by
         name in the {MODELS} variable, specifying a model
-        function taking as argument hidden_units for easier
+        function taking as argument hidden_size for easier
         parametrization.
 
     l1, l2: float, float (optional)
         l1 and l2 regularization values for the model.
         This is useful when the model is chosen by
         name in the {MODELS} variable, specifying a model
-        function taking as argument hidden_units for easier
+        function taking as argument hidden_size for easier
         parametrization.
 
     dropout: float (optional)
         Dropout regularization value for the model.
         This is useful when the model is chosen by
         name in the {MODELS} variable, specifying a model
-        function taking as argument hidden_units for easier
+        function taking as argument hidden_size for easier
         parametrization.
 
     """
     model_name, model = load_model(model_link,
-                                   hidden_units=hidden_units,
+                                   hidden_size=hidden_size,
                                    optimizer=optimizer,
                                    learning_rate=learning_rate,
                                    loss_fn=loss_fn,
@@ -201,8 +201,8 @@ if __name__ == "__main__":
     parser.add_argument('model', type=str, help="File path to saved model file.")
     parser.add_argument('x_train', nargs='?', type=str, default="./data/X_train.npy", help="File path to X train file.")
     parser.add_argument('y_train', nargs='?', type=str, default="./data/Y_train.npy", help="File path to Y train file.")
-    parser.add_argument('-xv', '--x_val', nargs='?', type=str, default="./data/X_val.npy", help="File path to X validation file.")
-    parser.add_argument('-yv', '--y_val', nargs='?', type=str, default="./data/Y_val.npy", help="File path to Y validation file.")
+    parser.add_argument('-xv', '--x_val', nargs='?', type=str, default="./data/X_val.npy", help="File path to X validation binary numpy file.")
+    parser.add_argument('-yv', '--y_val', nargs='?', type=str, default="./data/Y_val.npy", help="File path to Y validation binary numpy file.")
     # Fitting parameters
     parser.add_argument('-e', '--epochs', type=int, default=10, help="number of epochs to perform")
     parser.add_argument('-b', '--batch', type=int, default=256, help="batch size during training")
@@ -210,23 +210,21 @@ if __name__ == "__main__":
     parser.add_argument('-opt', '--optimizer', type=str.lower, default=None, choices=SELECT_OPTIMIZERS.keys(), help="chosen optimizer")
     parser.add_argument('-lr', '--learning_rate', type=float, default=None, help="chosen learning rate (if opt is set)")
     parser.add_argument('-lf', '--loss_function', type=float, default=None, help="chosen loss function (if opt is set)")
-    # Node size args for model taking these inputs (optional)
-    parser.add_argument('-h', '--hidden_units', type=int, default=None, help="Hidden units for a model taking this arg")
+    # Model specification, name and model architecture size (optional)
+    parser.add_argument('-m', '--model_name', type=str, default="unknown", help="chosen name for the model")
+    parser.add_argument('-s', '--hidden_size', type=int, default=None, help="Hidden units for a model taking this arg")
     # Regularization args (optional)
     parser.add_argument('-1', '--regl1', type=float, default=0.0, help="l1 regularization factor")
     parser.add_argument('-2', '--regl2', type=float, default=0.0, help="l2 regularization factor")
     parser.add_argument('-d', '--dropout', type=float, default=0.0, help="dropout regularization value")
     # Output paths
-    parser.add_argument('-o', '--output', type=str, default="./out/", help="output directory")
-    parser.add_argument('-mo', '--model_output', type=str, default="./out/", help="output directory for the model")
-    parser.add_argument('-w', '--model_write', action='store_false', help="should we overwrite model after training ?")
-    # Model name
-    parser.add_argument('-mn', '--model_name', type=str, default="unknown", help="chosen name for the model")
+    parser.add_argument('-o', '--model_output', type=str, default="./out/", help="output directory for the model")
+    parser.add_argument('-g', '--graph_output', type=str, default="./out/", help="output directory for the plots")
+    parser.add_argument('-w', '--overwrite', action='store_false', help="should we overwrite model after training ?")
 
     # Arguments retrieving
     args = parser.parse_args()
     # -- Input data
-    model_name = args.model_name
     model_link = args.model
     x_train_path = args.x_train
     y_train_path = args.y_train
@@ -243,10 +241,13 @@ if __name__ == "__main__":
     l1 = args.regl1
     l2 = args.regl2
     dropout = args.dropout
+    # -- 
+    model_name = args.model_name
+    hidden_size = args.hidden_size
     # -- Output directory & Write attribute
-    output_dir = args.output
     output_model_dir = args.model_output
-    overwrite = args.model_write
+    output_graph_dir = args.graph_output
+    overwrite = args.overwrite
 
     # Arguments checking
     if not auxiliary.isfile(x_train_path):
@@ -282,10 +283,19 @@ if __name__ == "__main__":
         raise Exception("dropout value should be positive")
     if not auxiliary.isdir(output_model_dir):
         raise Exception("Ouput directory for the model is invalid")
+    if not auxiliary.isdir(output_graph_dir):
+        raise Exception("Output directory for the graphical output is invalid")
+    if not model_name.isalnum():
+        raise Exception("Invalid model name, it should be a str containings only "
+                        "alphanumerical characters")
 
+    print(f"{overwrite = }")
     train_model(model_link,
                 *auxiliary.load_data(x_train_path, y_train_path),
                 *auxiliary.load_data(x_val_path, y_val_path),
+                save_graph_to=output_graph_dir,
+                save_md_to=output_model_dir,
+                overwrite=overwrite,
                 epochs=epochs,
                 batch_size=batch_size,
                 optimizer=optimizer,
@@ -293,7 +303,5 @@ if __name__ == "__main__":
                 loss_fn=loss_fn,
                 l1=l1,
                 l2=l2,
-                dropout=dropout,
-                save_to=output_dir,
-                save_md_to=output_model_dir
+                dropout=dropout
                 )

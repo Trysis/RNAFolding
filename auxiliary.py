@@ -22,6 +22,31 @@ def to_dirpath(dirpath, dir_sep="/"):
     return dirpath
 
 
+def load_data(x_path, y_path):
+    """Load X and Y files from specified file paths.
+    
+    x_path: str
+        Path to the X binary file (.npy)
+    y_path: str
+        Path to the Y binary file (.npy)
+    
+    Returns: np.ndarray, np.ndarray
+        X and Y numpy array
+
+    """
+    x, y = None, None
+    if x_path is not None and y_path is not None:
+        x_exists = os.path.isfile(x_path)
+        y_exists = os.path.isfile(y_path)
+        if x_exists and y_exists:
+            x = np.load(x_path)
+            y = np.load(y_path)
+        else:
+            raise Exception("One of the path is invalid")
+
+    return x, y
+
+
 def replace_extension(name, new_ext):
     """Takes a name and replace the existing extension
         by a specified extension. Or simply add the specified
@@ -88,31 +113,6 @@ def append_suffix(filepath, path_sep="/", suffix_sep="_"):
     filepath_suffix = f"{dirname}/{file_no_ext}{suffix_sep}{max_suffix}{ext}"
 
     return filepath_suffix
-
-
-def load_data(x_path, y_path):
-    """Load X and Y files from specified file paths.
-    
-    x_path: str
-        Path to the X binary file (.npy)
-    y_path: str
-        Path to the Y binary file (.npy)
-    
-    Returns: np.ndarray, np.ndarray
-        X and Y numpy array
-
-    """
-    x, y = None, None
-    if x_path is not None and y_path is not None:
-        x_exists = os.path.isfile(x_path)
-        y_exists = os.path.isfile(y_path)
-        if x_exists and y_exists:
-            x = np.load(x_path)
-            y = np.load(y_path)
-        else:
-            raise Exception("One of the path is invalid")
-
-    return x, y
 
 
 if __name__ == "__main__":
