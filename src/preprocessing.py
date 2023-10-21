@@ -19,7 +19,7 @@ RNA_BASES = [["A"], ["U"], ["C"], ["G"]]
 encoder = OneHotEncoder(handle_unknown='ignore', sparse_output=False).fit(RNA_BASES)
 
 
-def load_data(filepath, kwargs**) :
+def load_data(filepath, **kwargs) :
     """Load data from a CSV file.
 
     Parameters:
@@ -36,7 +36,7 @@ def load_data(filepath, kwargs**) :
     if not auxiliary.isfile(filepath):
         raise Exception(f"filepath is not a valid path.")
 
-    data = pd.read_csv(filepath, kwargs**)
+    data = pd.read_csv(filepath, **kwargs)
     return data
 
 
@@ -187,6 +187,7 @@ def get_target(cleared_train_data, to_match="^reactivity_[0-9]{4}$", dtype=np.fl
     Returns:
         targets(DataFrame):
             dataframe with reactivity columns
+
     """
     reactivity_columns = [colname for colname in cleared_train_data.columns if re.match(to_match, colname)]
     if len(reactivity_columns) == 0:
@@ -208,19 +209,19 @@ def reactivity_masking(targets) :
     Returns:
         reactivity_mask(Boolean mask):
             mask for na reactivity values
+
     """
-    
     reactivity_mask = ~np.isnan(targets.values)
     return reactivity_mask
 
 
-def train_val_sets(features, targets, reactivity_mask, test_size=0.2, random_state=42):
+def train_val_sets(*arrays, test_size=0.2, random_state=42):
     """Creates the Validation and the training sets
 
     Parameters :
-    - features(matrix) : concatenated encoded matrix
-    - targets(DataFrame) : dataframe with reactivity columns
-    - reactivity_mask(Boolean mask) : mask for na reactivity values
+        - features(matrix) : concatenated encoded matrix
+        - targets(DataFrame) : dataframe with reactivity columns
+        - reactivity_mask(Boolean mask) : mask for na reactivity values
     
     Returns :
         - X_train
@@ -229,15 +230,13 @@ def train_val_sets(features, targets, reactivity_mask, test_size=0.2, random_sta
         - y_val
         - mask_train
         - mask_val
-    """
-    
-    X_train, X_val, y_train, y_val, mask_train, mask_val = train_test_split(
-        features, targets, reactivity_mask, test_size=test_size, random_state=random_state)
-    
-    return X_train, X_val, y_train, y_val, mask_train, mask_val
 
+    """
+    return train_test_split(
+                *arrays, test_size=test_size, random_state=random_state
+            )
 
 if __name__ == "__main__":
+    X, Y = auxiliary.load_npy_xy("./data/X.npy", "./data/Y.npy")
     
-
 
