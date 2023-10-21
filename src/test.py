@@ -1,5 +1,18 @@
 import argparse
 
+import keras
+
+# Local modules
+import auxiliary
+
+
+def test_model(modelpath, x_filepath, save_to, kaggle_format=True, csv_format=".csv"):
+    model = keras.saving.load_model(model_link)
+    x = auxiliary.load_npy(x_filepath)
+
+    y_pred = model.predict(x)
+
+
 if __name__ == "__main__":
     ## Parsing
     parser = argparse.ArgumentParser(

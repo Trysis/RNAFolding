@@ -16,7 +16,7 @@ def simple_lstm(input_size=(457, 4), output_size=(2), to_compile=True, **kwargs)
     ])
     # BackPropagation algorithm and lr
     if to_compile:
-        pass
+        model.compile(optimizer="adam", loss="mean_squared_error")
 
     return model
 
