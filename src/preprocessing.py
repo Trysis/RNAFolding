@@ -31,7 +31,6 @@ def load_data(filepath, kwargs**) :
     Returns:
         - data (pandas.DataFrame):
             A Pandas DataFrame containing the loaded data.
-
     """
     if not auxiliary.isfile(filepath):
         raise Exception(f"filepath is not a valid path.")
@@ -40,19 +39,25 @@ def load_data(filepath, kwargs**) :
     return data
 
 
-def save_data(cleared_data, filepath, **kwargs) :
-    """Export the dataframe into a csv file
-    
-    Parameters : 
-        - cleared_train_data(DataFrame) : dataframe with the whole data
+def filter_SN(data, sn_column="SN_filter"):
+    """Filter the rows where "SN_filter" is equal to 1.
 
+    Parameters:
+        - data (DataFrame):
+            A pandas Dataframe containing the input data
+
+    Returns:
+        - cleaned_train_data (DataFrame):
+            A dataframe containing only the sequences that
+            passed the SN_filter.
     """
-    cleared_train_data.to_csv(filepath, index=False, **kwargs)
+    cleaned_train_data = data[data[sn_column] == 1]
+    return cleaned_train_data
 
 
 def filter_identical_sequences(
     data,
-    group_column=["sequence", "experiment_type"],
+    group_column="sequence",
     signal_column="signal_to_noise"
 ):
     """For identical sequences keep rows
@@ -73,23 +78,115 @@ def filter_identical_sequences(
     return filtered_df
 
 
-def filter_SN(data, sn_column="SN_filter"):
-    """Filter the rows where "SN_filter" is equal to 1.
+def columns_defining(cleaned_train_data) :
+    """Define the X and Y columns.
 
     Parameters:
-        - data (DataFrame):
-            A pandas Dataframe containing the input data
+        - cleaned_trained_data (Dataframe):
+            pandas dataframe input
 
     Returns:
-        - filtered_df (DataFrame):
-            A dataframe containing only the sequences that
-            passed the SN_filter.
+        - x_columns (list):
+            column names for X
+        - y_columns (list):
+            column names for Y
+        - conditional_columns (list):
+            contionnal columns for the whole dataset
     """
-    filtered_df = data[data[sn_column] == 1]
-    return filtered_df
+    x_columns = ["sequence_id", "sequence"]
+    conditional_columns = ["experiment_type", "signal_to_noise"]
+    y_columns = [colname for colname in cleared_train_data.columns if re.match("^reactivity_[0-9]{4}$", colname)]
+    return x_columns, y_columns, conditional_columns
 
 
-def features_encoding(rna_sequences, experiment_type):
+def column_filtering(cleaned_train_data, x_columns, y_columns, conditional_columns) :
+    """Select the necessary columns in the dataframe
+
+    Parameters:
+        - cleaned_train_data(DataFrame) : dataframe input
+        - x_columns(list): list of columns for X
+        - y_columns(list): list of columns for Y
+        - conditional_columns(list): list of conditional columns
+
+    Returns:
+        - cleaned_train_data(DataFrame) : dataframe with X and Y columns and the co,nditional ones
+    """
+    cleaned_train_data = cleaned_train_data[x_columns + conditional_columns + y_columns]
+    return cleaned_train_data
+
+
+def dataframe_separation(cleaned_train_data, experiment_column="experiment_type"):
+    """Create two dataframe based on the experiment type (DMS and 2A3)
+
+    Parameters:
+        - cleaned_train_data(DataFrame):
+            input dataframe to be separated in two
+
+    Returns:
+        - df_2A3_MaP(DataFrame):
+            dataframe with the 2A3 results only
+        - df_DMS_MaP(DataFrame):
+            dataframe with the DMS results only
+    """
+    df_2A3_MaP = cleaned_train_data[cleaned_train_data[experiment_column] == '2A3_MaP']
+    df_DMS_MaP = cleaned_train_data[cleaned_train_data[experiment_column] == 'DMS_MaP']
+
+    return df_2A3_MaP, df_DMS_MaP 
+
+
+def dataframe_concatenation(df_2A3_MaP, df_DMS_MaP):
+    """Concatenation of the experiment dataframes
+
+    Parameters :
+        - df_2A3_MaP(DataFrame):
+            dataframe with the 2A3 experiment results
+        - df_DMS_MaP(DataFrame):
+            dataframe with the DMS experiment results
+
+    Returns :
+        - cleared_train_data(DataFrame):
+            concatenated dataframe
+    """
+    mask_2A3 = df_2A3_MaP["sequence"].isin(df_DMS_MaP["sequence"])
+    mask_DMS = df_DMS_MaP["sequence"].isin(df_2A3_MaP["sequence"])
+
+    cleared_train_data = pd.concat([df_2A3_MaP[mask_2A3], df_DMS_MaP[mask_DMS]], ignore_index=True)
+    cleared_train_data = cleared_train_data.drop(columns=['signal_to_noise'], inplace=True)
+    return cleared_train_data
+
+
+def csv_export(cleared_train_data, y_columns) :
+    """Export the dataframe into a csv file
+    
+    Parameters : 
+    - cleared_train_data(DataFrame) : dataframe with the whole data
+    - y_columns(list) : columns for Y data
+    """
+    #Convert the y columns     
+    cleared_train_data[y_columns] = cleared_train_data[y_columns].astype(np.float32)
+    
+    #export the csv
+    csv_path = input("Enter your path :") 
+    cleared_train_data.to_csv(csv_path, index=False)
+
+
+def extraction(data) :
+    """Extract RNA sequences and experiment type
+    
+    Parameters :
+    - data(Dataframe) : preloaded dataframe with the right format
+    
+    Returns:
+    - rna_sequence(Series) : a pandas series with all the sequences
+    - experiment_type(Series) : a panda series with the experiment types
+    """
+    rna_sequences = data['sequence']
+    experiment_type = data['experiment_type']
+
+    return rna_sequence, experiment_type
+
+
+def features_encoding(rna_sequences, experiment_type) :
     """Fit and transform RNA sequences.
 
     Parameters :
@@ -109,35 +206,21 @@ def features_encoding(rna_sequences, experiment_type):
     return features
 
 
-def get_x(data, colname=["sequence"], dtype=np.float32):
-    if isinstance(colname, str):
-        colname = [colname]
-    elif not isinstance(colname, list):
-        colname = list(colname)
-
-    
-def get_target(cleared_train_data, to_match="^reactivity_[0-9]{4}$", dtype=np.float32) :
+def get_target(cleared_train_data) :
     """Extract reactivity columns as targets to use as Y.
 
     Parameters:
         cleared_train_data(DataFrame):
             pandas dataframe with the whole data
-        to_match: str
-            Pattern to match with the columns
-        dtype:
-            Type to convert target into
-
+    
     Returns:
         targets(DataFrame):
             dataframe with reactivity columns
     """
-    reactivity_columns = [colname for colname in cleared_train_data.columns if re.match(to_match, colname)]
-    if len(reactivity_columns) == 0:
-        raise Exception("Data frame does not contain columns to match with")
-
-    # Target values
-    targets = cleared_train_data[reactivity_columns].astype(dtype)
-
+    
+    reactivity_columns = cleared_train_data.columns[~cleared_train_data.columns.isin(['sequence','experiment_type'])]
+    targets = cleared_train_data[reactivity_columns]
+    
     return targets
 
 
@@ -205,6 +288,5 @@ def reshape_inp(X_train, X_val) :
 
 
 if __name__ == "__main__":
-    sequence = "AUCCUA"
 
 
