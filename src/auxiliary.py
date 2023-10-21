@@ -24,7 +24,25 @@ def to_dirpath(dirpath, dir_sep="/"):
     return dirpath
 
 
-def load_data(x_path, y_path):
+def save_npy(x, filepath_x, *args):
+    """Save a set of numpy array.
+    
+    x: np.ndarray
+        numpy array to save
+    filepath_x:
+        filename of x.npy data
+    args:
+        even number of arguments, such that it
+        contains numpy array and filepath associated
+        with it. args=[y, filepath_y, z, filepath_z, ...]
+
+    """
+    to_save = [x , filepath_x] + args
+    for i, arr in range(0, len(to_save), 2):
+        np.save(to_save[i + 1], to_save[i])
+
+
+def load_npy(x_path, y_path):
     """Load X and Y files from specified file paths.
     
     x_path: str

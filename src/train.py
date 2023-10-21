@@ -310,8 +310,8 @@ if __name__ == "__main__":
 
     # Model training
     train_model(model_link,
-                *auxiliary.load_data(x_train_path, y_train_path),
-                *auxiliary.load_data(x_val_path, y_val_path),
+                *auxiliary.load_npy(x_train_path, y_train_path),
+                *auxiliary.load_npy(x_val_path, y_val_path),
                 save_graph_to=output_graph_dir,
                 save_md_to=output_model_dir,
                 overwrite=overwrite,
