@@ -6,9 +6,6 @@ import pandas as pd
 import numpy as np
 from scipy.sparse import hstack
 from sklearn.preprocessing import OneHotEncoder
-import tensorflow as tf
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense, Masking, Reshape
 from sklearn.model_selection import train_test_split
 
 # Local modules
@@ -121,7 +118,10 @@ def onehot_from_sequence(sequence, encoder, to_add="0", maxlen=457):
 
 
 def encode_sequences(sequences, encoder, to_add="0", maxlen=457):
-    """Returns the set of encoded sequences for a list of sequences."""
+    """Returns the set of padded encoded sequences in one
+    hot encoding for a list of sequences.
+
+    """
     enc_list = []
     for sequence in sequences:
         enc_list.append(onehot_from_sequence(sequence, encoder, to_add, maxlen))
@@ -164,14 +164,6 @@ def pad_matrices(matrices, maxlen=457):
 
     return np.array(matrices_list)
 
-
-def get_x(data, colname=["sequence"], dtype=np.float32):
-    if isinstance(colname, str):
-        colname = [colname]
-    elif not isinstance(colname, list):
-        colname = list(colname)
-
-
     
 def get_target(cleared_train_data, to_match="^reactivity_[0-9]{4}$", dtype=np.float32) :
     """Extract reactivity columns as targets to use as Y.
@@ -199,22 +191,6 @@ def get_target(cleared_train_data, to_match="^reactivity_[0-9]{4}$", dtype=np.fl
     return targets
 
 
-def reactivity_masking(targets) :
-    """Handle Na reactivity values by creating a mask
-
-    Parameters:
-        targets(DataFrame):
-            dataframe with reactivity columns
-
-    Returns:
-        reactivity_mask(Boolean mask):
-            mask for na reactivity values
-
-    """
-    reactivity_mask = ~np.isnan(targets.values)
-    return reactivity_mask
-
-
 def train_val_sets(*arrays, test_size=0.2, random_state=42):
     """Creates the Validation and the training sets
 
@@ -236,7 +212,31 @@ def train_val_sets(*arrays, test_size=0.2, random_state=42):
                 *arrays, test_size=test_size, random_state=random_state
             )
 
+
+def robust_z_normalization(y):
+    y_median = np.nanmedian(y)
+    y_mad = np.nanmedian(np.abs(np.array(y) - y_median))
+    # Apply robust z-score normalization
+    y_normalized = (y - y_median) / (1.482602218505602 * y_mad)
+
+    return y_normalized
+
+
+def get_y(data, y_col="2A3"):
+    pass
+
+
 if __name__ == "__main__":
-    X, Y = auxiliary.load_npy_xy("./data/X.npy", "./data/Y.npy")
-    
+    x, y = auxiliary.load_npy_xy("./data/X.npy", "./data/Y.npy")
+    x_train, x_val, y_train, y_val = train_val_sets(x, y)
+    print(f"{y_train.reshape(-1, 2).shape = }")
+    print(f"{y_train.reshape(-1, 2) = }\n")
+    print(f"{np.trim_zeros}")
+    print(f"{np.nanmean(y_train[:5].reshape(-1, 2), axis=0) = }\n")
+    exit()
+
+    auxiliary.save_npy(x_train, "x_train",
+                       y_train, "y_train",
+                       x_val, "x_val",
+                       y_val, "y_val")
 

@@ -40,7 +40,8 @@ def save_npy(x, filepath_x, *args):
     """
     to_save = [x , filepath_x] + args
     for i, arr in range(0, len(to_save), 2):
-        np.save(to_save[i + 1], to_save[i])
+        filename = replace_extension(to_save[i], "npy")
+        np.save(to_save[i + 1], filename)
 
 
 def load_npy(path):
