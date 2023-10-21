@@ -14,10 +14,10 @@ def isdir(dirpath):
     return os.path.isdir(dirpath)
 
 
-def dirsep(dirpath, end_sep="/"):
-    """Returns a dirpath with it's ending file separator."""
-    dirpath = dirpath if filedir[-1] == end_sep else \
-              dirpath + end_sep
+def to_dirpath(dirpath, dir_sep="/"):
+    """Returns a dirpath with its ending file separator."""
+    dirpath = dirpath if filedir[-1] == dir_sep else \
+              dirpath + dir_sep
 
     return dirpath
 
