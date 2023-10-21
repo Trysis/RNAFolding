@@ -1,3 +1,4 @@
+""""""
 import os
 
 # Pattern matching
@@ -17,7 +18,7 @@ def isdir(dirpath):
 
 
 def to_dirpath(dirpath, dir_sep="/"):
-    """Returns a dirpath with its ending file separator."""
+    """Returns a {dirpath} with its ending file separator."""
     dirpath = dirpath if filedir[-1] == dir_sep else \
               dirpath + dir_sep
 
