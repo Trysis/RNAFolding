@@ -4,10 +4,11 @@ import keras
 import auxiliary as aux
 
 
-def simple_lstm(**kwargs):
+def simple_lstm(input_size=(457, 4), hidden_size=32, **kwargs):
+    """Simple lstm"""
     model = keras.Sequential([
-        keras.layers.Input(shape=(457, 4)),
-        keras.layers.LSTM(units=8, return_sequences=True),
+        keras.layers.Input(shape=input_size),
+        keras.layers.LSTM(units=hidden_size, return_sequences=True),
         keras.layers.Dense(units=2, activation='linear')
     ])
     return model
@@ -16,8 +17,12 @@ def simple_lstm(**kwargs):
 def set_optimizer(model, optimizer, loss):
     """Set the chosen optimizer on the model."""
     model.compile(optimizer=optimizer, loss=loss)
+    return model
 
 
 def save_model(model, dirpath="", filename="model", ext="keras"):
+    if not aux.isdir(dirpath):
+        raise Exception("Dirpath is invalid")
+    # Save model with attributed extension
     filename_ext = aux.replace_extension(filename, ext)
     model.save(filepath)

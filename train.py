@@ -9,6 +9,7 @@ from tensorflow import keras
 
 # Local modules
 import model
+import auxiliary
 
 # Constantes
 SELECT_OPTIMIZERS = {
@@ -20,30 +21,6 @@ SELECT_OPTIMIZERS = {
 SELECT_MODELS = {
     "simple_lstm": model.simple_lstm,
 }
-
-
-def load_data(x_path, y_path):
-    """Load X and Y files from specified file paths.
-    
-    x_path: str
-        Path to the X binary file (.npy)
-    y_path: str
-        Path to the Y binary file (.npy)
-    
-    Returns: np.ndarray, np.ndarray
-        X and Y numpy array
-    """
-    x, y = None, None
-    if x_path is not None and y_path is not None:
-        x_exists = os.path.isfile(x_path)
-        y_exists = os.path.isfile(y_path)
-        if x_exists and y_exists:
-            x = np.load(x_path)
-            y = np.load(y_path)
-        else:
-            raise Exception("One of the paths is invalid")
-
-    return x, y
 
 
 def load_model(model_link,
@@ -97,7 +74,7 @@ def load_model(model_link,
     """
     # Name of the model and Model
     model_name, selected_model = "unknown.keras", None
-    if os.path.isfile(model_link):
+    if auxiliary.isfile(model_link):
         # When path to model file is existant
         model = keras.saving.load_model(model_link)
         model_name = os.path.basename(model_link)
@@ -123,7 +100,7 @@ def load_model(model_link,
 
 
 def train_model(model_link, x_train, y_train, x_val=None, y_val=None,
-                save_to=None, save_md_to=None,
+                save_to=None, save_md_to=None, overwrite=True,
                 epochs=None, batch_size=None, 
                 optimizer=None, learning_rate=None, loss_fn=None,
                 hidden_units=None, l1=None, l2=None, dropout=None,
@@ -152,6 +129,11 @@ def train_model(model_link, x_train, y_train, x_val=None, y_val=None,
 
     save_md_to: str (optional)
         Output directory for the model
+
+    overwrite: bool (default=True)
+        Should we overwrite the model file after training ?
+        If False, the new name will have the same model name
+        with an added suffix
 
     optimizer: keras.optimizers.optimizer.Optimizer
         Selected optimizer
@@ -236,7 +218,7 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--dropout', type=float, default=0.0, help="dropout regularization value")
     # Output paths
     parser.add_argument('-o', '--output', type=str, default="./out/", help="output directory")
-    parser.add_argument('-mo', '--model_output', type=str, default=None, help="output directory for the model")
+    parser.add_argument('-mo', '--model_output', type=str, default="./out/", help="output directory for the model")
     parser.add_argument('-w', '--model_write', action='store_false', help="should we overwrite model after training ?")
     # Model name
     parser.add_argument('-mn', '--model_name', type=str, default="unknown", help="chosen name for the model")
@@ -244,7 +226,7 @@ if __name__ == "__main__":
     # Arguments retrieving
     args = parser.parse_args()
     # -- Input data
-
+    model_name = args.model_name
     model_link = args.model
     x_train_path = args.x_train
     y_train_path = args.y_train
@@ -267,10 +249,10 @@ if __name__ == "__main__":
     overwrite = args.model_write
 
     # Arguments checking
-    if not os.path.isfile(x_train_path):
+    if not auxiliary.isfile(x_train_path):
         raise Exception(f"Path to x_train is incorrect :\n\t{x_train_path}")
 
-    if not os.path.isfile(y_train_path):
+    if not auxiliary.isfile(y_train_path):
         raise Exception(f"Path to y_train is incorrect :\n\t{y_train_path}")
 
     if (x_val_path is None) or (y_val_path is None):
@@ -288,18 +270,22 @@ if __name__ == "__main__":
 
     if epochs <= 0:
         raise Exception("epochs value should be positive (>=0)")
-
     if batch_size < 1:
         batch_size = None
-
     if optimizer is None:
         loss_fn = None
-
-    print(args.optimizer)
+    if l1 < 0:
+        raise Exception("l1 regularization should be positive")
+    if l2 < 0:
+        raise Exception("l2 regularization should be positive")
+    if dropout < 0:
+        raise Exception("dropout value should be positive")
+    if not auxiliary.isdir(output_model_dir):
+        raise Exception("Ouput directory for the model is invalid")
 
     train_model(model_link,
-                *load_data(x_train_path, y_train_path),
-                *load_data(x_val_path, y_val_path),
+                *auxiliary.load_data(x_train_path, y_train_path),
+                *auxiliary.load_data(x_val_path, y_val_path),
                 epochs=epochs,
                 batch_size=batch_size,
                 optimizer=optimizer,
