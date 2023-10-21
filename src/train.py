@@ -194,7 +194,7 @@ def train_model(model_link, x_train, y_train, x_val=None, y_val=None,
                         **kwargs)
 
     if save_md_to is not None:
-        if os.path.isdir(save_md_to):
+        if auxiliary.isdir(save_md_to):
             model.save(save_md_to, save_format=save_format)
 
     return history
@@ -310,8 +310,8 @@ if __name__ == "__main__":
 
     # Model training
     train_model(model_link,
-                *auxiliary.load_npy(x_train_path, y_train_path),
-                *auxiliary.load_npy(x_val_path, y_val_path),
+                *auxiliary.load_npy_xy(x_train_path, y_train_path),
+                *auxiliary.load_npy_xy(x_val_path, y_val_path),
                 save_graph_to=output_graph_dir,
                 save_md_to=output_model_dir,
                 overwrite=overwrite,
