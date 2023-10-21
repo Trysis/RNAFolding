@@ -42,7 +42,15 @@ def save_npy(x, filepath_x, *args):
         np.save(to_save[i + 1], to_save[i])
 
 
-def load_npy(x_path, y_path):
+def load_npy(path):
+    """Load a npy binary file from a specified path"""
+    if not isfile(path):
+        return None
+
+    return np.load(path)
+
+
+def load_npy_xy(x_path, y_path):
     """Load X and Y files from specified file paths.
     
     x_path: str
