@@ -26,6 +26,14 @@ def legend_patch(label, color="none"):
     """
     return label, mpatches.Patch(color=color, label=label)
 
+def single_plot(values, scale = "linear", mode="plot",
+         title="", metric="", xlabel="", ylabel="", alphas=(1,),
+         xleft=None, xright=None, ytop=None, ybottom=None,
+         loss=None, normalize=False, overwrite=True,
+         save_to=None, filename="plot.png",
+         label="", **kwargs
+):
+    pass
 
 def plot(indices, observed, predicted, scale = "linear", mode="plot",
          title="", metric="", xlabel="", ylabel="", alphas=(1, 1),

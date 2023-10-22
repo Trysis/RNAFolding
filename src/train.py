@@ -3,7 +3,7 @@
 import os
 import argparse
 
-import pandas as pd
+import numpy as np
 import tensorflow as tf
 from keras import backend
 from tensorflow import keras
@@ -11,6 +11,7 @@ from tensorflow import keras
 # Local modules
 import model
 import loss
+import plots
 import auxiliary
 
 # Constantes
@@ -191,6 +192,9 @@ def train_model(model_link, x_train, y_train, x_val=None, y_val=None,
             raise Exception("Output directory has been set but invalid")
         save_graph_to = auxiliary.to_dirpath(save_graph_to)
 
+    if not all([x_val is None, y_val is None]) and any([x_val is None, y_val is None]):
+        raise Exception("When x_val or y_val is set. Both should.")
+
     # Model loading
     model_name, model = load_model(model_link,
                                    hidden_size=hidden_size,
@@ -215,7 +219,7 @@ def train_model(model_link, x_train, y_train, x_val=None, y_val=None,
             callbacks.append(
                 tf.keras.callbacks.ModelCheckpoint(
                     filepath=modelpath,
-                    monitor="val_loss",
+                    monitor="val_loss" if x_val is not None else "loss",
                     save_weights_only=False,
                     save_best_only=True
                 )
@@ -225,7 +229,7 @@ def train_model(model_link, x_train, y_train, x_val=None, y_val=None,
     if patience:
         callbacks.append(
             tf.keras.callbacks.EarlyStopping(
-                monitor="val_loss",
+                monitor="val_loss" if x_val is not None else "loss",
                 patience=patience
             )
         )
@@ -247,8 +251,20 @@ def train_model(model_link, x_train, y_train, x_val=None, y_val=None,
     if save_md_to and not savebest:
         model.save(modelpath, save_format=save_format)
 
-    if save_graph_to:
-        pass
+    if save_graph_to is not None:
+        model_name_png = auxiliary.replace_extension(model_name, "png")
+        losses = history.history["loss"]
+        indices = np.arange(len(losses))
+        if x_val is not None:
+            val_losses = history.history["val_loss"]
+            print(losses)
+            plots.plot(indices,
+                       losses,
+                       val_losses,
+                       save_to=save_graph_to,
+                       filename=f"val_loss={val_losses[-1]:4.3f}_{model_name_png}",
+                       mode = "plot"
+                       )
 
     return history
 
