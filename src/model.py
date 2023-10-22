@@ -14,9 +14,10 @@ def simple_lstm(input_size=(457, 4), output_size=(2), to_compile=True, **kwargs)
         keras.layers.LSTM(units=hidden_size, return_sequences=True),
         keras.layers.Dense(units=output_size, activation='linear')
     ])
+
     # BackPropagation algorithm and lr
     if to_compile:
-        pass
+        set_optimizer(model=model, optimizer="adam", loss="mean_squared_error")
 
     return model
 

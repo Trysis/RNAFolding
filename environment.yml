@@ -1,0 +1,17 @@
+name: BI
+channels:
+  - defaults
+dependencies:
+  - matplotlib
+  - jupyterlab
+  - pandas
+  - pycodestyle
+  - joblib
+  - pydocstyle
+  - biopython
+  - jupyter
+  - pylint
+  - keras
+  - tensorflow
+  - scikit-learn
+

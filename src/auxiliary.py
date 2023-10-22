@@ -1,9 +1,15 @@
+<<<<<<< HEAD
+=======
+"""Contains utilitary functions."""
+
+>>>>>>> roude
 import os
 
 # Pattern matching
 import re
 
 import numpy as np
+from sklearn.model_selection import train_test_split
 
 
 def isfile(filepath):
@@ -17,8 +23,13 @@ def isdir(dirpath):
 
 
 def to_dirpath(dirpath, dir_sep="/"):
+<<<<<<< HEAD
     """Returns a dirpath with its ending file separator."""
     dirpath = dirpath if filedir[-1] == dir_sep else \
+=======
+    """Returns a {dirpath} with its ending file separator."""
+    dirpath = dirpath if dirpath[-1] == dir_sep else \
+>>>>>>> roude
               dirpath + dir_sep
 
     return dirpath
@@ -37,12 +48,26 @@ def save_npy(x, filepath_x, *args):
         with it. args=[y, filepath_y, z, filepath_z, ...]
 
     """
-    to_save = [x , filepath_x] + args
-    for i, arr in range(0, len(to_save), 2):
-        np.save(to_save[i + 1], to_save[i])
+    to_save = [x , filepath_x]
+    to_save += tuple(args) if args is not None else []
+    for i in range(0, len(to_save), 2):
+        filename = replace_extension(to_save[i + 1], "npy")
+        np.save(filename, to_save[i])
 
 
+<<<<<<< HEAD
 def load_npy(x_path, y_path):
+=======
+def load_npy(path, **kwargs):
+    """Load a npy binary file from a specified path"""
+    if not isfile(path):
+        return None
+
+    return np.load(path, **kwargs)
+
+
+def load_npy_xy(x_path, y_path):
+>>>>>>> roude
     """Load X and Y files from specified file paths.
     
     x_path: str
@@ -65,6 +90,39 @@ def load_npy(x_path, y_path):
             raise Exception("One of the path is invalid")
 
     return x, y
+
+
+def min_max(arraylike):
+    """Returns the min and max from an array."""
+    return min(arraylike), max(arraylike)
+
+
+def min_max_normalization(values, min_scale, max_scale):
+    """Normalize values on a specified min and max range.
+
+    values: array-like (numpy.ndarray) -> shape (n_samples, x)
+        Values to perform normalization on
+    min_scale: float
+        Bottom range limit to apply on values so that
+        values range from [values.min, values.max] to values[min_scale, values.max]
+    max_scale: float
+        Upper range limit to apply on values so that
+        values range from [values.min, values.max] to values[values.min, max_scale]
+
+    Returns: array-like of shape (n_samples, x)
+        Normalized array in range [min_scale, max_scale]
+
+    """
+    min_val, max_val = values.min(), values.max()
+
+    # Normalization
+    scale_plage = max_scale - min_scale
+    val_plage = max_val - min_val
+    flex_shift = values - min_val
+    flex_normalized = (flex_shift * (scale_plage/val_plage)) + min_scale
+
+    # Returns
+    return flex_normalized
 
 
 def replace_extension(name, new_ext):
@@ -117,6 +175,7 @@ def append_suffix(filepath, path_sep="/", suffix_sep="_"):
     # Else we append a suffix
     dirname = os.path.dirname(filepath)  # directory name
     dirname = "." if dirname == "" else dirname
+    dirname = to_dirpath(dirname, path_sep)
     filename = os.path.basename(filepath)  # file name
     file_no_ext, ext = os.path.splitext(filename)
     # Match files with the same pattern as ours
@@ -133,6 +192,26 @@ def append_suffix(filepath, path_sep="/", suffix_sep="_"):
     filepath_suffix = f"{dirname}/{file_no_ext}{suffix_sep}{max_suffix}{ext}"
 
     return filepath_suffix
+
+
+def train_val_test_split(x, y, train_size=0.7, val_size=0.15, seed=42):
+    """Returns the train, validation and test set from a given data."""
+    if train_size + val_size >= 1:
+        train_size=0.7
+        val_size=0.15
+
+    # Test proportion
+    test_size = 1 - train_size - val_size
+    # Define train data
+    x_train, x_val_test, y_train, y_val_test = train_test_split(
+        x, y, test_size=1-train_size, random_state=seed
+    )
+    # Define val and test data
+    x_val, x_test, y_val, y_test = train_test_split(
+        x_val_test, y_val_test, test_size=test_size/(1-train_size), random_state=seed
+    )
+
+    return x_train, x_val, x_test, y_train, y_val, y_test
 
 
 if __name__ == "__main__":
