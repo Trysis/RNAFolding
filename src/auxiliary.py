@@ -1,8 +1,5 @@
-<<<<<<< HEAD
-=======
 """Contains utilitary functions."""
 
->>>>>>> roude
 import os
 
 # Pattern matching
@@ -23,13 +20,8 @@ def isdir(dirpath):
 
 
 def to_dirpath(dirpath, dir_sep="/"):
-<<<<<<< HEAD
-    """Returns a dirpath with its ending file separator."""
-    dirpath = dirpath if filedir[-1] == dir_sep else \
-=======
     """Returns a {dirpath} with its ending file separator."""
     dirpath = dirpath if dirpath[-1] == dir_sep else \
->>>>>>> roude
               dirpath + dir_sep
 
     return dirpath
@@ -55,9 +47,6 @@ def save_npy(x, filepath_x, *args):
         np.save(filename, to_save[i])
 
 
-<<<<<<< HEAD
-def load_npy(x_path, y_path):
-=======
 def load_npy(path, **kwargs):
     """Load a npy binary file from a specified path"""
     if not isfile(path):
@@ -67,7 +56,6 @@ def load_npy(path, **kwargs):
 
 
 def load_npy_xy(x_path, y_path):
->>>>>>> roude
     """Load X and Y files from specified file paths.
     
     x_path: str

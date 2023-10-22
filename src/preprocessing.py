@@ -48,12 +48,8 @@ def filter_SN(data, sn_column="SN_filter"):
             A dataframe containing only the sequences that
             passed the SN_filter.
     """
-<<<<<<< HEAD
     cleaned_train_data = data[data[sn_column] == 1]
     return cleaned_train_data
-=======
-    cleared_data.to_csv(filepath, index=False, **kwargs)
->>>>>>> roude
 
 
 def filter_identical_sequences(
@@ -96,11 +92,10 @@ def columns_defining(cleaned_train_data) :
     """
     x_columns = ["sequence_id", "sequence"]
     conditional_columns = ["experiment_type", "signal_to_noise"]
-    y_columns = [colname for colname in cleared_train_data.columns if re.match("^reactivity_[0-9]{4}$", colname)]
+    y_columns = [colname for colname in cleaned_train_data.columns if re.match("^reactivity_[0-9]{4}$", colname)]
     return x_columns, y_columns, conditional_columns
 
 
-<<<<<<< HEAD
 def column_filtering(cleaned_train_data, x_columns, y_columns, conditional_columns) :
     """Select the necessary columns in the dataframe
 
@@ -185,15 +180,11 @@ def extraction(data) :
     rna_sequences = data['sequence']
     experiment_type = data['experiment_type']
 
-    return rna_sequence, experiment_type
+    return rna_sequences, experiment_type
 
 
-def features_encoding(rna_sequences, experiment_type) :
-    """Fit and transform RNA sequences.
-=======
 def onehot_from_sequence(sequence, encoder, to_add="0", maxlen=457):
     """Takes a sequence and returns its one hot encoding.
->>>>>>> roude
 
     sequence: str
         RNA sequence, should be in upper character
@@ -223,9 +214,6 @@ def onehot_from_sequence(sequence, encoder, to_add="0", maxlen=457):
     return onehot_sequence
 
 
-<<<<<<< HEAD
-def get_target(cleared_train_data) :
-=======
 def encode_sequences(sequences, encoder, to_add="0", maxlen=457):
     """Returns the set of padded encoded sequences in one
     hot encoding for a list of sequences.
@@ -275,7 +263,6 @@ def pad_matrices(matrices, maxlen=457):
 
 
 def get_target(cleared_train_data, to_match="^reactivity_[0-9]{4}$", dtype=np.float32) :
->>>>>>> roude
     """Extract reactivity columns as targets to use as Y.
 
     Parameters:
@@ -330,8 +317,6 @@ def get_y(data, y_col="2A3"):
 
 
 if __name__ == "__main__":
-<<<<<<< HEAD
-=======
     dt = auxiliary.load_npy("./data/ohe_cleared_train_data.npy", allow_pickle=True)
     X_list = []
     Y_list = []
@@ -346,7 +331,6 @@ if __name__ == "__main__":
         )
         for xy in dt
     ]
->>>>>>> roude
 
     import preprocessing
     X = preprocessing.pad_matrices(X_list)
