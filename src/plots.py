@@ -1,5 +1,7 @@
 """This scripts contains plot functions."""
 
+import os
+
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
@@ -28,7 +30,9 @@ def legend_patch(label, color="none"):
 def plot(indices, observed, predicted, scale = "linear", mode="plot",
          title="", metric="", xlabel="", ylabel="", alphas=(1, 1),
          xleft=None, xright=None, ytop=None, ybottom=None,
-         r2=None, loss=None, normalize=False, show=False, **kwargs
+         r2=None, loss=None, normalize=False,
+         save_to=None, filename="plot.png", overwrite=True,
+         **kwargs
 ):
     """Generate a specified figure.
     
@@ -121,7 +125,7 @@ def plot(indices, observed, predicted, scale = "linear", mode="plot",
         # Normalization needed before mean, std, median calculation
         op_concat = np.concatenate((observed, predicted), axis=0)
         if not delta:
-            op_concat = normalization_min_max(all, 0, 1)
+            op_concat = auxiliary.normalization_min_max(all, 0, 1)
             observed = op_concat[:observed.shape[0]]
             predicted = op_concat[observed.shape[0]:]
 
@@ -132,7 +136,7 @@ def plot(indices, observed, predicted, scale = "linear", mode="plot",
 
     # Delta (Observed - Predicted)
     delta_values = observed - predicted
-    delta_values = normalization_min_max(delta_values, -1, 1) if normalize else delta_values
+    delta_values = auxiliary.normalization_min_max(delta_values, -1, 1) if normalize else delta_values
 
     # Delta (Observed - Predicted) : Mean, std, median
     mean_delta, std_delta = delta_values.mean(), delta_values.std()
@@ -272,9 +276,16 @@ def plot(indices, observed, predicted, scale = "linear", mode="plot",
     # Grid
     ax.grid(grid)
 
-    if save_file is not None:
-        save_file = auxiliary.
-        plt.savefig(save_file, bbox_inches = 'tight')
+    if save_to is not None and auxiliary.isdir(save_to):
+        root, _ = os.path.splitext(filename)
+        root = root if root.isalnum() else "plot"
+        # Save file to
+        save_to = auxiliary.to_dirpath(save_to)
+        filename = auxiliary.replace_extension(root, "png")
+        filepath = save_to + filename if overwrite else \
+                   auxiliary.filepath_with_suffix(save_to + filename)
+
+        plt.savefig(filepath, bbox_inches = 'tight')
 
     return fig, ax
 

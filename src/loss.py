@@ -1,3 +1,5 @@
+"""This script contains loss functions."""
+
 import tensorflow as tf
 
 def masked_loss_fn(y_true, y_pred, padded_value=0.0):

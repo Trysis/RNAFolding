@@ -19,7 +19,7 @@ def isdir(dirpath):
 
 def to_dirpath(dirpath, dir_sep="/"):
     """Returns a {dirpath} with its ending file separator."""
-    dirpath = dirpath if filedir[-1] == dir_sep else \
+    dirpath = dirpath if dirpath[-1] == dir_sep else \
               dirpath + dir_sep
 
     return dirpath
@@ -80,6 +80,34 @@ def load_npy_xy(x_path, y_path):
 def min_max(arraylike):
     """Returns the min and max from an array."""
     return min(arraylike), max(arraylike)
+
+
+def min_max_normalization(values, min_scale, max_scale):
+    """Normalize values on a specified min and max range.
+
+    values: array-like (numpy.ndarray) -> shape (n_samples, x)
+        Values to perform normalization on
+    min_scale: float
+        Bottom range limit to apply on values so that
+        values range from [values.min, values.max] to values[min_scale, values.max]
+    max_scale: float
+        Upper range limit to apply on values so that
+        values range from [values.min, values.max] to values[values.min, max_scale]
+
+    Returns: array-like of shape (n_samples, x)
+        Normalized array in range [min_scale, max_scale]
+
+    """
+    min_val, max_val = values.min(), values.max()
+
+    # Normalization
+    scale_plage = max_scale - min_scale
+    val_plage = max_val - min_val
+    flex_shift = values - min_val
+    flex_normalized = (flex_shift * (scale_plage/val_plage)) + min_scale
+
+    # Returns
+    return flex_normalized
 
 
 def replace_extension(name, new_ext):
