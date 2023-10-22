@@ -41,7 +41,7 @@ def load_model(model_link,
         model name present in global variable {MODELS}
         that will point to the function creating the model
 
-    optimizer: keras.optimizers.optimizer.Optimizer
+    optimizer: str
         Selected optimizer
 
     learning_rate: float (optional)
@@ -92,13 +92,16 @@ def load_model(model_link,
         model_name = model_link + ".keras"
 
     # Set parameters if defined
-    if optimizer is not None and loss_fn is not None:
-        # Change optimizer with attributed loss function
-        optimizer_fn = optimizer(**kwargs) if learning_rate is None else \
-                    optimizer(learning_rate=learning_rate, **kwargs)
+    if optimizer is not None:
+        optimizer = SELECT_OPTIMIZERS[optimizer]
+        if loss_fn is not None:
+            # Change optimizer with attributed loss function
+            optimizer_fn = optimizer(**kwargs) if learning_rate is None else \
+                        optimizer(learning_rate=learning_rate, **kwargs)
 
-        model.compile(optimizer=optimizer_fn, loss=loss_fn, **kwargs)
-    elif optimizer is not None and learning_rate is not None:
+            model.compile(optimizer=optimizer_fn, loss=loss_fn, **kwargs)
+
+    if learning_rate is not None:
         # Only change learning rate
         backend.set_value(model.optimizer.learning_rate, learning_rate)
 
@@ -196,6 +199,9 @@ def train_model(model_link, x_train, y_train, x_val=None, y_val=None,
     if save_md_to is not None:
         if auxiliary.isdir(save_md_to):
             model.save(save_md_to, save_format=save_format)
+
+    if save_graph_to:
+        pass
 
     return history
 
@@ -317,7 +323,7 @@ if __name__ == "__main__":
                 overwrite=overwrite,
                 epochs=epochs,
                 batch_size=batch_size,
-                optimizer=SELECT_OPTIMIZERS[optimizer],
+                optimizer=optimizer,
                 learning_rate=learning_rate,
                 loss_fn=loss_fn,
                 hidden_size=hidden_size,
