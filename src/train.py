@@ -77,7 +77,7 @@ def load_model(model_link,
 
     """
     # Name of the model and Model
-    model_name, selected_model = "unknown.keras", None
+    model_name, model = "unknown.keras", None
     if auxiliary.isfile(model_link):
         # When path to model file is existant
         model = keras.saving.load_model(model_link)

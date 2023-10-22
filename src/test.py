@@ -44,5 +44,3 @@ if __name__ == "__main__":
 
     if not auxiliary.isdir(output_dir):
         raise Exception("Output directory is invalid")
-
-    

@@ -277,7 +277,10 @@ def plot(indices, observed, predicted, scale = "linear", mode="plot",
     # Grid
     ax.grid(grid)
 
-    if save_to is not None and auxiliary.isdir(save_to):
+    if save_to is not None:
+        if not auxiliary.isdir(save_to):
+            raise Exception("Specified directory does not exists")
+
         root, _ = os.path.splitext(filename)
         root = root if root.isalnum() else "plot"
         # Save file to

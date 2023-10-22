@@ -164,7 +164,7 @@ def pad_matrices(matrices, maxlen=457):
 
     return np.array(matrices_list)
 
-    
+
 def get_target(cleared_train_data, to_match="^reactivity_[0-9]{4}$", dtype=np.float32) :
     """Extract reactivity columns as targets to use as Y.
 
@@ -227,16 +227,33 @@ def get_y(data, y_col="2A3"):
 
 
 if __name__ == "__main__":
-    x, y = auxiliary.load_npy_xy("./data/X.npy", "./data/Y.npy")
-    x_train, x_val, y_train, y_val = train_val_sets(x, y)
-    print(f"{y_train.reshape(-1, 2).shape = }")
-    print(f"{y_train.reshape(-1, 2) = }\n")
-    print(f"{np.trim_zeros}")
-    print(f"{np.nanmean(y_train[:5].reshape(-1, 2), axis=0) = }\n")
-    exit()
+    dt = auxiliary.load_npy("./data/ohe_cleared_train_data.npy", allow_pickle=True)
+    X_list = []
+    Y_list = []
+    [
+        (
+            X_list.append(
+                xy[['Nucleotide_A', 'Nucleotide_C', 'Nucleotide_G', 'Nucleotide_U']].tolist()
+            ),
+            Y_list.append(
+                xy[['DMS_MaP_Reactivity', '2A3_MaP_Reactivity']].tolist()
+            ),
+        )
+        for xy in dt
+    ]
 
-    auxiliary.save_npy(x_train, "x_train",
-                       y_train, "y_train",
-                       x_val, "x_val",
-                       y_val, "y_val")
+    import preprocessing
+    X = preprocessing.pad_matrices(X_list)
+    Y = preprocessing.pad_matrices(Y_list)
 
+    x_train, x_val, x_test, y_train, y_val, y_test \
+        = auxiliary.train_val_test_split(X, Y)
+
+    auxiliary.save_npy(X, "./data/x",
+                       Y, "./data/y",
+                       x_train, "./data/x_train",
+                       y_train, "./data/y_train",
+                       x_val, "./data/x_val",
+                       y_val, "./data/y_val",
+                       x_test, "./data/x_test",
+                       y_test, "./data/y_test")
