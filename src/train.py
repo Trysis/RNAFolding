@@ -4,6 +4,7 @@ import os
 import argparse
 
 import pandas as pd
+import tensorflow as tf
 from keras import backend
 from tensorflow import keras
 
@@ -319,6 +320,11 @@ if __name__ == "__main__":
     if not model_name.isalnum():
         raise Exception("Invalid model name, it should be a str containings only "
                         "alphanumerical characters")
+
+    if tf.config.list_physical_devices("GPU"):
+        print("GPU")
+    else:
+        print("No GPU")
 
     # Model training
     train_model(model_link,
