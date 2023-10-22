@@ -1,4 +1,4 @@
-""""""
+"""This script is used to train the model on a specified X and Y training set."""
 
 import os
 import argparse

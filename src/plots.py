@@ -1,4 +1,4 @@
-""""""
+"""This scripts contains plot functions."""
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -7,6 +7,8 @@ import matplotlib.colors as mcolors
 
 from sklearn.metrics import r2_score
 
+# Local modules
+import auxiliary
 
 def legend_patch(label, color="none"):
     """Returns the corresponding label with a Patch object for matplotlib legend purposes.
@@ -16,7 +18,7 @@ def legend_patch(label, color="none"):
     color: str
         Corresponding color attribute for label
 
-    Returns: tuple {str, matplotlib.patches.Patch}
+    Returns: tuple -> tuple(str, matplotlib.patches.Patch)
         Specified label with Patch
 
     """
@@ -72,6 +74,7 @@ def plot(indices, observed, predicted, scale = "linear", mode="plot",
 
     Returns: tuple (matplotlib.figure, matplotlib.axes.Axes)
         Figure and Axes for graphical purposes
+
     """
     # Plot mode selection
     plotting_mode = {
@@ -93,7 +96,7 @@ def plot(indices, observed, predicted, scale = "linear", mode="plot",
     # Optional arguments
     if mode.startswith("hist"):
         kwargs["bins"] = kwargs.get("bins", 100)  # necessary if mode == "hist"/"hist2d"
-        kwargs["cmap"] = kwargs.get("cmap", plt.cm.jet)
+        kwargs["cmap"] = kwargs.get("cmLoadap", plt.cm.jet)
         kwargs["norm"] = kwargs.get("norm", mcolors.LogNorm())
 
     xticks = kwargs.get("xticks", None)
@@ -243,7 +246,7 @@ def plot(indices, observed, predicted, scale = "linear", mode="plot",
     if (mode == "scatter"):
         title += f" - scale={scale}"
         # Range to have xlim=ylim
-        xy_lim = min_max(ax.get_xlim() + ax.get_ylim())
+        xy_lim = auxiliary.min_max(ax.get_xlim() + ax.get_ylim())
         ax.set_xlim(xy_lim)
         ax.set_ylim(xy_lim)
     elif (mode == "delta_bar"):
@@ -269,8 +272,9 @@ def plot(indices, observed, predicted, scale = "linear", mode="plot",
     # Grid
     ax.grid(grid)
 
-    if show:
-        plt.savefig("test.png", bbox_inches = 'tight')
+    if save_file is not None:
+        save_file = auxiliary.
+        plt.savefig(save_file, bbox_inches = 'tight')
 
     return fig, ax
 
@@ -279,4 +283,4 @@ if __name__ == "__main__":
     indices = [1, 2, 2]
     obs = [1, 2, 3]
     pred = [1.1, 2.2, 3.1]
-    plot(indices, obs, pred, show=True)
+    plot(indices, obs, pred, save_file=".")

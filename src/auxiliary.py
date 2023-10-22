@@ -77,6 +77,11 @@ def load_npy_xy(x_path, y_path):
     return x, y
 
 
+def min_max(arraylike):
+    """Returns the min and max from an array."""
+    return min(arraylike), max(arraylike)
+
+
 def replace_extension(name, new_ext):
     """Takes a name and replace the existing extension
         by a specified extension. Or simply add the specified

@@ -1,3 +1,5 @@
+"""This script will be used to test the model on an X data."""
+
 import argparse
 
 import keras
