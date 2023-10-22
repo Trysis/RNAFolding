@@ -22,6 +22,28 @@ def simple_lstm(input_size=(457, 4), output_size=(2), to_compile=True, **kwargs)
     return model
 
 
+def bilstm(input_size=(457, 4), output_size=(2), to_compile=True, **kwargs):
+    """Simple lstm"""
+    # Model
+    model = keras.Sequential([
+        keras.layers.Input(shape=input_size),
+        keras.layers.Bidirectional(
+            keras.layers.LSTM(units=256, return_sequences=True)
+        ),
+        keras.layers.LSTM(units=128, return_sequences=True),
+        keras.layers.Dropout(0.1),
+        keras.layers.Dense(units=64, activation='relu'),
+        keras.layers.Dense(units=32, activation='relu'),
+        keras.layers.Dense(units=output_size, activation='linear')
+    ])
+
+    # BackPropagation algorithm and lr
+    if to_compile:
+        set_optimizer(model=model, optimizer="adam", loss=loss.masked_loss_fn)
+
+    return model
+
+
 def set_optimizer(model, optimizer, loss):
     """Set the chosen optimizer on the model."""
     model.compile(optimizer=optimizer, loss=loss)
