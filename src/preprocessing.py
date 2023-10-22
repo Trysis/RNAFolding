@@ -6,9 +6,6 @@ import pandas as pd
 import numpy as np
 from scipy.sparse import hstack
 from sklearn.preprocessing import OneHotEncoder
-import tensorflow as tf
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense, Masking, Reshape
 from sklearn.model_selection import train_test_split
 
 # Local modules
@@ -19,7 +16,7 @@ RNA_BASES = [["A"], ["U"], ["C"], ["G"]]
 encoder = OneHotEncoder(handle_unknown='ignore', sparse_output=False).fit(RNA_BASES)
 
 
-def load_data(filepath, kwargs**) :
+def load_data(filepath, **kwargs) :
     """Load data from a CSV file.
 
     Parameters:
@@ -35,7 +32,7 @@ def load_data(filepath, kwargs**) :
     if not auxiliary.isfile(filepath):
         raise Exception(f"filepath is not a valid path.")
 
-    data = pd.read_csv(filepath, kwargs**)
+    data = pd.read_csv(filepath, **kwargs)
     return data
 
 
@@ -51,8 +48,12 @@ def filter_SN(data, sn_column="SN_filter"):
             A dataframe containing only the sequences that
             passed the SN_filter.
     """
+<<<<<<< HEAD
     cleaned_train_data = data[data[sn_column] == 1]
     return cleaned_train_data
+=======
+    cleared_data.to_csv(filepath, index=False, **kwargs)
+>>>>>>> bcc9b2a2235eb72ab761b338d2d65a6ea3cc533e
 
 
 def filter_identical_sequences(
@@ -72,7 +73,7 @@ def filter_identical_sequences(
             a filtered dataframe with the sequences
             with a maximum signal to noise.
     """
-    filtered_df = cleaned_train_data.groupby(group_column).apply(
+    filtered_df = data.groupby(group_column).apply(
         lambda x: x.loc[x[signal_column].idxmax()]
     )
     return filtered_df
@@ -99,6 +100,7 @@ def columns_defining(cleaned_train_data) :
     return x_columns, y_columns, conditional_columns
 
 
+<<<<<<< HEAD
 def column_filtering(cleaned_train_data, x_columns, y_columns, conditional_columns) :
     """Select the necessary columns in the dataframe
 
@@ -188,25 +190,92 @@ def extraction(data) :
 
 def features_encoding(rna_sequences, experiment_type) :
     """Fit and transform RNA sequences.
+=======
+def onehot_from_sequence(sequence, encoder, to_add="0", maxlen=457):
+    """Takes a sequence and returns its one hot encoding.
+>>>>>>> bcc9b2a2235eb72ab761b338d2d65a6ea3cc533e
 
-    Parameters :
-        - rna_sequence(Series):
-            a pandas series with all the RNA sequences
-        - experiment_type(Series):
-            a panda series with the experiment types
+    sequence: str
+        RNA sequence, should be in upper character
 
-    Returns :
-        - features(matrix):
-            concatenated encoded matrix
+    encoder: sklearn.preprocessing.OneHotEncoder
+        Encoder to convert the sequence
+
+    to_add:
+        character to append until padding is reached
+        with {maxlen}.
+
+    maxlen: int
+        Sequence maximum length for padding
+
+    Returns: numpy.ndarray
+        One hot encoding of the sequence.
+
     """
-    encoder = OneHotEncoder(sparse_output = True, dtype=np.int64)
-    rna_sequences_encoded = encoder.fit_transform(rna_sequences.values.reshape(-1,1))
-    experiment_type_encoded = pd.get_dummies(experiment_type)
-    features = hstack((rna_sequences_encoded, experiment_type_encoded))
-    return features
+    if not maxlen:
+        maxlen = 0
+
+    proccessed_sequence = sequence.upper()
+    proccessed_sequence += to_add * (maxlen - len(sequence))
+    proccessed_sequence = [[nbase] for nbase in proccessed_sequence]
+    onehot_sequence = encoder.transform(proccessed_sequence)
+
+    return onehot_sequence
 
 
+<<<<<<< HEAD
 def get_target(cleared_train_data) :
+=======
+def encode_sequences(sequences, encoder, to_add="0", maxlen=457):
+    """Returns the set of padded encoded sequences in one
+    hot encoding for a list of sequences.
+
+    """
+    enc_list = []
+    for sequence in sequences:
+        enc_list.append(onehot_from_sequence(sequence, encoder, to_add, maxlen))
+
+    return np.array(enc_list)
+
+
+def pad_matrix(matrix_2d, maxlen=457):
+    """Takes a 2D matrix and add padding.
+
+    matrix_2d: numpy.ndarray
+        2D numpy array matrix of shape (n, m)
+
+    maxlen: int
+        {m} maximum length for padding
+
+    Returns: numpy.ndarray
+        The padded matrix if {m}<{maxlen} else it
+        returns the matrix.
+
+    """
+    if not isinstance(matrix_2d, np.ndarray):
+        matrix_2d = np.array(matrix_2d)
+
+    if maxlen - matrix_2d.shape[0] <= 0:
+        return matrix_2d
+
+    add_len = maxlen - matrix_2d.shape[0]
+    padding = ((0, add_len), (0, 0))  # padding on axis
+    matrix_2d_padded = np.pad(matrix_2d, pad_width=padding, mode="constant")
+
+    return matrix_2d_padded
+
+
+def pad_matrices(matrices, maxlen=457):
+    """Takes a set of 2D matrix and add padding to each of them."""
+    matrices_list = []
+    for matrix in matrices:
+        matrices_list.append(pad_matrix(matrix, maxlen))
+
+    return np.array(matrices_list)
+
+
+def get_target(cleared_train_data, to_match="^reactivity_[0-9]{4}$", dtype=np.float32) :
+>>>>>>> bcc9b2a2235eb72ab761b338d2d65a6ea3cc533e
     """Extract reactivity columns as targets to use as Y.
 
     Parameters:
@@ -216,6 +285,7 @@ def get_target(cleared_train_data) :
     Returns:
         targets(DataFrame):
             dataframe with reactivity columns
+
     """
     
     reactivity_columns = cleared_train_data.columns[~cleared_train_data.columns.isin(['sequence','experiment_type'])]
@@ -224,29 +294,13 @@ def get_target(cleared_train_data) :
     return targets
 
 
-def reactivity_masking(targets) :
-    """Handle Na reactivity values by creating a mask
-
-    Parameters:
-        targets(DataFrame):
-            dataframe with reactivity columns
-
-    Returns:
-        reactivity_mask(Boolean mask):
-            mask for na reactivity values
-    """
-    
-    reactivity_mask = ~np.isnan(targets.values)
-    return reactivity_mask
-
-
-def train_val_sets(features, targets, reactivity_mask, test_size=0.2, random_state=42):
+def train_val_sets(*arrays, test_size=0.2, random_state=42):
     """Creates the Validation and the training sets
 
     Parameters :
-    - features(matrix) : concatenated encoded matrix
-    - targets(DataFrame) : dataframe with reactivity columns
-    - reactivity_mask(Boolean mask) : mask for na reactivity values
+        - features(matrix) : concatenated encoded matrix
+        - targets(DataFrame) : dataframe with reactivity columns
+        - reactivity_mask(Boolean mask) : mask for na reactivity values
     
     Returns :
         - X_train
@@ -255,38 +309,57 @@ def train_val_sets(features, targets, reactivity_mask, test_size=0.2, random_sta
         - y_val
         - mask_train
         - mask_val
+
     """
-    
-    X_train, X_val, y_train, y_val, mask_train, mask_val = train_test_split(
-        features, targets, reactivity_mask, test_size=test_size, random_state=random_state)
-    
-    return X_train, X_val, y_train, y_val, mask_train, mask_val
+    return train_test_split(
+                *arrays, test_size=test_size, random_state=random_state
+            )
 
 
-def reshape_inp(X_train, X_val) :
-    """Reshape the input format
+def robust_z_normalization(y):
+    y_median = np.nanmedian(y)
+    y_mad = np.nanmedian(np.abs(np.array(y) - y_median))
+    # Apply robust z-score normalization
+    y_normalized = (y - y_median) / (1.482602218505602 * y_mad)
 
-    Parameters:
-    - X_train: Training feature matrix (e.g., dense matrix)
-    - X_val: Validation feature matrix (e.g., dense matrix)
+    return y_normalized
 
-    Returns:
-    - X_train_reshaped: Reshaped training data with time step dimension
-    - X_val_reshaped: Reshaped validation data with time step dimension
-    """
-    # Convert dense matrix to dense array 
-    X_train_dense = X_train.toarray()
-    X_val_dense = X_val.toarray()
 
-    # Reshape input data to include the time step dimension
-    timesteps = 1  # Number of time steps (since since we have masked sequences)
-    input_dim = X_train_dense.shape[1]
-    X_train_reshaped = X_train_dense.reshape(X_train_dense.shape[0], timesteps, input_dim)
-    X_val_reshaped = X_val_dense.reshape(X_val_dense.shape[0], timesteps, input_dim)
-    
-    return X_val_reshaped, X_val_reshaped
+def get_y(data, y_col="2A3"):
+    pass
 
 
 if __name__ == "__main__":
+<<<<<<< HEAD
+=======
+    dt = auxiliary.load_npy("./data/ohe_cleared_train_data.npy", allow_pickle=True)
+    X_list = []
+    Y_list = []
+    [
+        (
+            X_list.append(
+                xy[['Nucleotide_A', 'Nucleotide_C', 'Nucleotide_G', 'Nucleotide_U']].tolist()
+            ),
+            Y_list.append(
+                xy[['DMS_MaP_Reactivity', '2A3_MaP_Reactivity']].tolist()
+            ),
+        )
+        for xy in dt
+    ]
+>>>>>>> bcc9b2a2235eb72ab761b338d2d65a6ea3cc533e
 
+    import preprocessing
+    X = preprocessing.pad_matrices(X_list)
+    Y = preprocessing.pad_matrices(Y_list)
 
+    x_train, x_val, x_test, y_train, y_val, y_test \
+        = auxiliary.train_val_test_split(X, Y)
+
+    auxiliary.save_npy(X, "./data/x",
+                       Y, "./data/y",
+                       x_train, "./data/x_train",
+                       y_train, "./data/y_train",
+                       x_val, "./data/x_val",
+                       y_val, "./data/y_val",
+                       x_test, "./data/x_test",
+                       y_test, "./data/y_test")

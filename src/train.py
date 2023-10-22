@@ -1,4 +1,4 @@
-""""""
+"""This script is used to train the model on a specified X and Y training set."""
 
 import os
 import argparse
@@ -77,7 +77,7 @@ def load_model(model_link,
 
     """
     # Name of the model and Model
-    model_name, selected_model = "unknown.keras", None
+    model_name, model = "unknown.keras", None
     if auxiliary.isfile(model_link):
         # When path to model file is existant
         model = keras.saving.load_model(model_link)
@@ -95,7 +95,7 @@ def load_model(model_link,
     if optimizer is not None and loss_fn is not None:
         # Change optimizer with attributed loss function
         optimizer_fn = optimizer(**kwargs) if learning_rate is None else \
-                    optimizer(learning_rate=learning_rate, **kwars)
+                    optimizer(learning_rate=learning_rate, **kwargs)
 
         model.compile(optimizer=optimizer_fn, loss=loss_fn, **kwargs)
     elif optimizer is not None and learning_rate is not None:
@@ -185,7 +185,7 @@ def train_model(model_link, x_train, y_train, x_val=None, y_val=None,
 
     save_format = kwargs.get("save_format", "tf")
     XY_val = None if x_val is None and y_val is None else \
-            (X_val, Y_val)
+            (x_val, y_val)
 
     history = model.fit(x_train, y_train,
                         validation_data=XY_val,
@@ -324,4 +324,4 @@ if __name__ == "__main__":
                 l1=l1,
                 l2=l2,
                 dropout=dropout
-                )
+    )
