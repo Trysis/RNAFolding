@@ -1,4 +1,5 @@
-""""""
+"""Contains utilitary functions."""
+
 import os
 
 # Pattern matching
@@ -44,12 +45,12 @@ def save_npy(x, filepath_x, *args):
         np.save(to_save[i + 1], filename)
 
 
-def load_npy(path):
+def load_npy(path, **kwargs):
     """Load a npy binary file from a specified path"""
     if not isfile(path):
         return None
 
-    return np.load(path)
+    return np.load(path, **kwargs)
 
 
 def load_npy_xy(x_path, y_path):
@@ -160,6 +161,7 @@ def append_suffix(filepath, path_sep="/", suffix_sep="_"):
     # Else we append a suffix
     dirname = os.path.dirname(filepath)  # directory name
     dirname = "." if dirname == "" else dirname
+    dirname = to_dirpath(dirname, path_sep)
     filename = os.path.basename(filepath)  # file name
     file_no_ext, ext = os.path.splitext(filename)
     # Match files with the same pattern as ours
