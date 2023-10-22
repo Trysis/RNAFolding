@@ -55,7 +55,7 @@ def load_npy(path, **kwargs):
     return np.load(path, **kwargs)
 
 
-def load_npy_xy(x_path, y_path):
+def load_npy_xy(x_path, y_path, **kwargs):
     """Load X and Y files from specified file paths.
     
     x_path: str
@@ -72,8 +72,8 @@ def load_npy_xy(x_path, y_path):
         x_exists = os.path.isfile(x_path)
         y_exists = os.path.isfile(y_path)
         if x_exists and y_exists:
-            x = np.load(x_path)
-            y = np.load(y_path)
+            x = np.load(x_path, **kwargs)
+            y = np.load(y_path, **kwargs)
         else:
             raise Exception("One of the path is invalid")
 

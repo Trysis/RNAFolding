@@ -298,4 +298,8 @@ if __name__ == "__main__":
     indices = [1, 2, 2]
     obs = [1, 2, 3]
     pred = [1.1, 2.2, 3.1]
-    plot(indices, obs, pred, save_to="./")
+    #plot(indices, obs, pred, save_to="./")
+    x = auxiliary.load_npy("./data/y_train.npy")
+    print(x)
+    print(type(x))
+    print(x.shape)

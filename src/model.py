@@ -2,7 +2,7 @@ import keras
 
 # Local modules
 import auxiliary as aux
-
+import loss
 
 def simple_lstm(input_size=(457, 4), output_size=(2), to_compile=True, **kwargs):
     """Simple lstm"""
@@ -17,7 +17,7 @@ def simple_lstm(input_size=(457, 4), output_size=(2), to_compile=True, **kwargs)
 
     # BackPropagation algorithm and lr
     if to_compile:
-        set_optimizer(model=model, optimizer="adam", loss="mean_squared_error")
+        set_optimizer(model=model, optimizer="adam", loss=loss.masked_loss_fn)
 
     return model
 

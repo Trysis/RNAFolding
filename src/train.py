@@ -168,7 +168,8 @@ def train_model(model_link, x_train, y_train, x_val=None, y_val=None,
         function taking as argument hidden_size for easier
         parametrization.
 
-    dropout: float (optional)
+    dropout: float (}
+optional)
         Dropout regularization value for the model.
         This is useful when the model is chosen by
         name in the {MODELS} variable, specifying a model
