@@ -14,3 +14,6 @@ def masked_loss_fn(y_true, y_pred, padded_value=0.0):
 
     # Only available values will be calculated
     return tf.reduce_mean(squared_difference * weight_mask, axis=-1)  # Note the `axis=-1`
+
+if __name__ == "__main_":
+    pass

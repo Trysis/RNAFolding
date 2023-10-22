@@ -95,7 +95,7 @@ def load_model(model_link,
     if optimizer is not None and loss_fn is not None:
         # Change optimizer with attributed loss function
         optimizer_fn = optimizer(**kwargs) if learning_rate is None else \
-                    optimizer(learning_rate=learning_rate, **kwars)
+                    optimizer(learning_rate=learning_rate, **kwargs)
 
         model.compile(optimizer=optimizer_fn, loss=loss_fn, **kwargs)
     elif optimizer is not None and learning_rate is not None:

@@ -44,7 +44,7 @@ def save_data(cleared_data, filepath, **kwargs) :
         - cleared_train_data(DataFrame) : dataframe with the whole data
 
     """
-    cleared_train_data.to_csv(filepath, index=False, **kwargs)
+    cleared_data.to_csv(filepath, index=False, **kwargs)
 
 
 def filter_identical_sequences(
@@ -64,7 +64,7 @@ def filter_identical_sequences(
             a filtered dataframe with the sequences
             with a maximum signal to noise.
     """
-    filtered_df = cleaned_train_data.groupby(group_column).apply(
+    filtered_df = data.groupby(group_column).apply(
         lambda x: x.loc[x[signal_column].idxmax()]
     )
     return filtered_df
