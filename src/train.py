@@ -187,7 +187,7 @@ optional)
                                    **kwargs
                                    )
 
-    save_format = kwargs.get("save_format", "tf")
+    save_format = kwargs.get("save_format", "keras")
     XY_val = None if x_val is None and y_val is None else \
             (x_val, y_val)
 
@@ -199,7 +199,9 @@ optional)
 
     if save_md_to is not None:
         if auxiliary.isdir(save_md_to):
-            model.save(save_md_to, save_format=save_format)
+            save_md_to = auxiliary.to_dirpath(save_md_to)
+            modelpath = save_md_to + model_name
+            model.save(modelpath, save_format=save_format)
 
     if save_graph_to:
         pass
