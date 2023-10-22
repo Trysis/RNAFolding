@@ -295,11 +295,7 @@ def plot(indices, observed, predicted, scale = "linear", mode="plot",
 
 
 if __name__ == "__main__":
-    indices = [1, 2, 2]
-    obs = [1, 2, 3]
+    indices = [0, 1, 2]
+    obs = [1, 2, 2]
     pred = [1.1, 2.2, 3.1]
-    #plot(indices, obs, pred, save_to="./")
-    x = auxiliary.load_npy("./data/y_train.npy")
-    print(x)
-    print(type(x))
-    print(x.shape)
+    plot(indices, obs, pred, mode="plot", save_to="./")

@@ -117,6 +117,7 @@ def train_model(model_link, x_train, y_train, x_val=None, y_val=None,
                 epochs=None, batch_size=None, 
                 optimizer=None, learning_rate=None, loss_fn=None,
                 hidden_size=None, l1=None, l2=None, dropout=None,
+                savebest=None, patience=None,
                 **kwargs
 ):
     """This function will return a model based on the
@@ -172,8 +173,7 @@ def train_model(model_link, x_train, y_train, x_val=None, y_val=None,
         function taking as argument hidden_size for easier
         parametrization.
 
-    dropout: float (}
-optional)
+    dropout: float (optional)
         Dropout regularization value for the model.
         This is useful when the model is chosen by
         name in the {MODELS} variable, specifying a model
@@ -181,6 +181,17 @@ optional)
         parametrization.
 
     """
+    if save_md_to is not None:
+        if not auxiliary.isdir(save_md_to):
+            raise Exception("Output directory has been set but invalid")
+        save_md_to = auxiliary.to_dirpath(save_md_to)
+
+    if save_graph_to is not None:
+        if not auxiliary.isdir(save_graph_to):
+            raise Exception("Output directory has been set but invalid")
+        save_graph_to = auxiliary.to_dirpath(save_graph_to)
+
+    # Model loading
     model_name, model = load_model(model_link,
                                    hidden_size=hidden_size,
                                    optimizer=optimizer,
@@ -192,6 +203,37 @@ optional)
                                    )
 
     save_format = kwargs.get("save_format", "keras")
+
+    callbacks = []
+    modelpath = None
+    if save_md_to:
+        modelpath = save_md_to + model_name if overwrite else \
+                    auxiliary.append_suffix(save_md_to + model_name)
+
+        # SaveBestModel callbacks
+        if savebest:
+            callbacks.append(
+                tf.keras.callbacks.ModelCheckpoint(
+                    filepath=modelpath,
+                    monitor="val_loss",
+                    save_weights_only=False,
+                    save_best_only=True
+                )
+            )
+
+    # Patience callbacks
+    if patience:
+        callbacks.append(
+            tf.keras.callbacks.EarlyStopping(
+                monitor="val_loss",
+                patience=patience
+            )
+        )
+
+    # Checks if at least one callback is applied
+    callbacks = callbacks if len(callbacks) > 0 else None
+ 
+    # Model fitting
     XY_val = None if x_val is None and y_val is None else \
             (x_val, y_val)
 
@@ -199,13 +241,11 @@ optional)
                         validation_data=XY_val,
                         batch_size=batch_size,
                         epochs=epochs,
+                        callbacks=callbacks,
                         **kwargs)
 
-    if save_md_to is not None:
-        if auxiliary.isdir(save_md_to):
-            save_md_to = auxiliary.to_dirpath(save_md_to)
-            modelpath = save_md_to + model_name
-            model.save(modelpath, save_format=save_format)
+    if save_md_to and not savebest:
+        model.save(modelpath, save_format=save_format)
 
     if save_graph_to:
         pass
@@ -233,7 +273,7 @@ if __name__ == "__main__":
     # Optimizer args (optional)
     parser.add_argument('-opt', '--optimizer', type=str.lower, default="adam", choices=SELECT_OPTIMIZERS.keys(), help="chosen optimizer")
     parser.add_argument('-lr', '--learning_rate', type=float, default=None, help="chosen learning rate (if opt is set)")
-    parser.add_argument('-lf', '--loss_function', type=float, default=loss.masked_loss_fn, help="chosen loss function (if opt is set)")
+    parser.add_argument('-lf', '--loss_function', type=str, default=loss.masked_loss_fn, help="chosen loss function (if opt is set)")
     # Model specification, name and model architecture size (optional)
     parser.add_argument('-m', '--model_name', type=str, default="unknown", help="chosen name for the model")
     parser.add_argument('-s', '--hidden_size', type=int, default=None, help="Hidden units for a model taking this arg")
@@ -241,6 +281,9 @@ if __name__ == "__main__":
     parser.add_argument('-1', '--regl1', type=float, default=0.0, help="l1 regularization factor")
     parser.add_argument('-2', '--regl2', type=float, default=0.0, help="l2 regularization factor")
     parser.add_argument('-d', '--dropout', type=float, default=0.0, help="dropout regularization value")
+    # Callbacks
+    parser.add_argument('-a', '--savebest', action='store_false', help="Save best by default, if set save only at end")
+    parser.add_argument('-p', '--patience', type=int, default=None, help="Stop training after patience iterations if no improvment")
     # Output paths (default values)
     parser.add_argument('-o', '--model_output', type=str, default="./out/", help="output directory for the model")
     parser.add_argument('-g', '--graph_output', type=str, default="./out/", help="output directory for the plots")
@@ -268,6 +311,9 @@ if __name__ == "__main__":
     l1 = args.regl1
     l2 = args.regl2
     dropout = args.dropout
+    # -- Callbacks
+    savebest = args.savebest
+    patience = args.patience
     # -- Output directory & Write attribute
     output_model_dir = args.model_output
     output_graph_dir = args.graph_output
@@ -311,6 +357,10 @@ if __name__ == "__main__":
     if dropout < 0:
         raise Exception("dropout value should be positive")
 
+    if patience is not None:
+        if patience < 0:
+            raise Exception("patience should be strictly positive")
+
     if not auxiliary.isdir(output_model_dir):
         raise Exception("Ouput directory for the model is invalid")
 
@@ -341,5 +391,7 @@ if __name__ == "__main__":
                 hidden_size=hidden_size,
                 l1=l1,
                 l2=l2,
-                dropout=dropout
+                dropout=dropout,
+                savebest=savebest,
+                patience=patience
     )
