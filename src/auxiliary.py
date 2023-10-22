@@ -6,6 +6,7 @@ import os
 import re
 
 import numpy as np
+from sklearn.model_selection import train_test_split
 
 
 def isfile(filepath):
@@ -39,10 +40,11 @@ def save_npy(x, filepath_x, *args):
         with it. args=[y, filepath_y, z, filepath_z, ...]
 
     """
-    to_save = [x , filepath_x] + args
-    for i, arr in range(0, len(to_save), 2):
-        filename = replace_extension(to_save[i], "npy")
-        np.save(to_save[i + 1], filename)
+    to_save = [x , filepath_x]
+    to_save += tuple(args) if args is not None else []
+    for i in range(0, len(to_save), 2):
+        filename = replace_extension(to_save[i + 1], "npy")
+        np.save(filename, to_save[i])
 
 
 def load_npy(path, **kwargs):
@@ -178,6 +180,26 @@ def append_suffix(filepath, path_sep="/", suffix_sep="_"):
     filepath_suffix = f"{dirname}/{file_no_ext}{suffix_sep}{max_suffix}{ext}"
 
     return filepath_suffix
+
+
+def train_val_test_split(x, y, train_size=0.7, val_size=0.15, seed=42):
+    """Returns the train, validation and test set from a given data."""
+    if train_size + val_size >= 1:
+        train_size=0.7
+        val_size=0.15
+
+    # Test proportion
+    test_size = 1 - train_size - val_size
+    # Define train data
+    x_train, x_val_test, y_train, y_val_test = train_test_split(
+        x, y, test_size=1-train_size, random_state=seed
+    )
+    # Define val and test data
+    x_val, x_test, y_val, y_test = train_test_split(
+        x_val_test, y_val_test, test_size=test_size/(1-train_size), random_state=seed
+    )
+
+    return x_train, x_val, x_test, y_train, y_val, y_test
 
 
 if __name__ == "__main__":
