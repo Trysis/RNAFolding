@@ -80,7 +80,7 @@ def load_model(model_link,
     model_name, model = "unknown.keras", None
     if auxiliary.isfile(model_link):
         # When path to model file is existant
-        model = keras.saving.load_model(model_link)
+        model = keras.saving.load_model(model_link, compile=False)
         model_name = os.path.basename(model_link)
     else:
         # Create a model from zero, by selecting by name
@@ -90,6 +90,9 @@ def load_model(model_link,
                       l1=l1, l2=l2, dropout=dropout,
                       **kwargs)
         model_name = model_link + ".keras"
+
+    if model is None:
+        raise Exception("Model not found")
 
     # Set parameters if defined
     if optimizer is not None:
@@ -227,7 +230,7 @@ if __name__ == "__main__":
     parser.add_argument('-e', '--epochs', type=int, default=10, help="number of epochs to perform")
     parser.add_argument('-b', '--batch', type=int, default=256, help="batch size during training")
     # Optimizer args (optional)
-    parser.add_argument('-opt', '--optimizer', type=str.lower, default=None, choices=SELECT_OPTIMIZERS.keys(), help="chosen optimizer")
+    parser.add_argument('-opt', '--optimizer', type=str.lower, default="adam", choices=SELECT_OPTIMIZERS.keys(), help="chosen optimizer")
     parser.add_argument('-lr', '--learning_rate', type=float, default=None, help="chosen learning rate (if opt is set)")
     parser.add_argument('-lf', '--loss_function', type=float, default=loss.masked_loss_fn, help="chosen loss function (if opt is set)")
     # Model specification, name and model architecture size (optional)
