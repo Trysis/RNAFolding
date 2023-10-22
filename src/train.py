@@ -185,7 +185,7 @@ def train_model(model_link, x_train, y_train, x_val=None, y_val=None,
 
     save_format = kwargs.get("save_format", "tf")
     XY_val = None if x_val is None and y_val is None else \
-            (X_val, Y_val)
+            (x_val, y_val)
 
     history = model.fit(x_train, y_train,
                         validation_data=XY_val,
@@ -324,4 +324,4 @@ if __name__ == "__main__":
                 l1=l1,
                 l2=l2,
                 dropout=dropout
-                )
+    )
