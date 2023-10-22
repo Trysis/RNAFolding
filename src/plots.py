@@ -32,6 +32,7 @@ def plot(indices, observed, predicted, scale = "linear", mode="plot",
          xleft=None, xright=None, ytop=None, ybottom=None,
          r2=None, loss=None, normalize=False,
          save_to=None, filename="plot.png", overwrite=True,
+         lab_1="observed", lab_2="predicted",
          **kwargs
 ):
     """Generate a specified figure.
@@ -144,7 +145,7 @@ def plot(indices, observed, predicted, scale = "linear", mode="plot",
 
     # Plot depending on mode
     fig, ax = plt.subplots(figsize=(8, 7))
-    label_observed, label_predicted = "observed", "predicted"
+    label_observed, label_predicted = lab_1, lab_2
     if (mode == "plot"):
         plotting_mode[mode](ax)(indices, observed[indices], label=label_observed, alpha=alphas[0], **kwargs)
         plotting_mode[mode](ax)(indices, predicted[indices], label=label_predicted, alpha=alphas[1], **kwargs)
@@ -294,4 +295,4 @@ if __name__ == "__main__":
     indices = [1, 2, 2]
     obs = [1, 2, 3]
     pred = [1.1, 2.2, 3.1]
-    plot(indices, obs, pred, save_file=".")
+    plot(indices, obs, pred, save_to="./")
