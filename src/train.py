@@ -89,13 +89,13 @@ def load_model(model_link,
         # Create a model from zero, by selecting by name
         # the specified model in {SELECT_MODELS} global variable
         model = SELECT_MODELS.get(model_link, None)
+        if model is None:
+            raise Exception("Model not found")
+
         model = model(hidden_size=hidden_size,
                       l1=l1, l2=l2, dropout=dropout,
                       **kwargs)
         model_name = model_link + ".keras"
-
-    if model is None:
-        raise Exception("Model not found")
 
     # Set parameters if defined
     if optimizer is not None:
