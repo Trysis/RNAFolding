@@ -18,7 +18,7 @@ import auxiliary
 
 def test_model(model, x, y, id=None,
                model_name="unknown", lab=None, metric="mse",
-               save_to=None, kaggle_format=True, overwrite=False
+               save_to=None, overwrite=False
 ):
     """"""
     if save_to is not None and auxiliary.isdir(save_to):
@@ -129,7 +129,7 @@ if __name__ == "__main__":
     parser.add_argument('y_path', nargs='?', type=str, default="./data/y_val.npy", help="Filepath to Y file.")
     parser.add_argument('-i', '--identifiant', type=str, default="./data/i_val.npy", help="Filepath indicating id associated with X")
     parser.add_argument('-o', '--output_dir', type=str, default="./out/", help="output directory")
-    parser.add_argument('-l', '--label', type=str, default="train", help="label associated with the collected data")
+    parser.add_argument('-l', '--label', type=str, default="", help="label associated with the collected data")
     parser.add_argument('-p', '--allow_pickle', action='store_false', help="allow pickle numpy argument")
 
     # Arguments retrieving
