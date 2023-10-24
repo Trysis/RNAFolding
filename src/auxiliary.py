@@ -85,7 +85,7 @@ def min_max(arraylike):
     return min(arraylike), max(arraylike)
 
 
-def min_max_normalization(values, min_scale, max_scale):
+def min_max_normalization(values, min_scale, max_scale, ignore_nan=True):
     """Normalize values on a specified min and max range.
 
     values: array-like (numpy.ndarray) -> shape (n_samples, x)
@@ -101,7 +101,8 @@ def min_max_normalization(values, min_scale, max_scale):
         Normalized array in range [min_scale, max_scale]
 
     """
-    min_val, max_val = values.min(), values.max()
+    min_val, max_val = values.min(), values.max() if not ignore_nan else \
+                       np.nanmin(values), np.nanmax(values)
 
     # Normalization
     scale_plage = max_scale - min_scale
