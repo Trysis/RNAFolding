@@ -49,10 +49,10 @@ def transfor(input_size=(457, 4), output_size=(2), to_compile=True, **kwargs):
     model = keras.Sequential([
         keras.layers.Input(shape=input_size),
         TokenAndPositionEmbedding(*input_size, 32),
-        TransformerBlock(32, 2, 32),
-        keras.layers.GlobalAveragePooling1D(),
-        keras.layers.Dropout(0.1),
+        TransformerBlock(32, 2, 16),
+        keras.layers.GlobalAveragePooling2D(),
         keras.layers.Dense(units=16, activation='relu'),
+        keras.layers.Dropout(0.1),
         keras.layers.Dense(units=8, activation='relu'),
         keras.layers.Dense(units=output_size, activation='linear')
     ])
