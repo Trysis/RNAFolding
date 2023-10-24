@@ -1,5 +1,8 @@
-import keras
+""""""
+
 import tensorflow as tf
+from tensorflow import keras
+
 # Local modules
 import auxiliary as aux
 import loss
@@ -109,7 +112,7 @@ def set_optimizer(model, optimizer, loss):
 
 
 def load_model(modelpath, compile=False, **kwargs):
-    model = keras.saving.load_model(modelpath, compile=False)
+    model = keras.saving.load_model(modelpath, compile=compile,)
     return model
 
 

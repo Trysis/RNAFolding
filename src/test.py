@@ -22,7 +22,7 @@ def test_model(model, x, y, id=None, lab=None, metric="mse", save_to=None, kaggl
     y_pred = model.predict(x)
     xlabel = "valeur observée"
     ylabel = "valeur prédite"
-    if id is None:
+    if id is not None:
         # Id
         for id, r_obs, r_pred in zip(id, y_obs, y_pred):
             to_title = "" if lab is None else f"\n{lab}"
@@ -93,6 +93,7 @@ if __name__ == "__main__":
     parser.add_argument('-i', '--identifiant', type=str, default="./data/i_val.npy", help="Filepath indicating id associated with X")
     parser.add_argument('-o', '--output_dir', type=str, default="./out/", help="output directory")
     parser.add_argument('-l', '--label', type=str, default="train", help="label associated with the collected data")
+    parser.add_argument('-p', '--allow_pickle', action='store_false', help="allow pickle numpy argument")
 
     # Arguments retrieving
     args = parser.parse_args()
@@ -103,6 +104,7 @@ if __name__ == "__main__":
     id_filepath = args.identifiant
     output_dir = args.output_dir
     label = args.label
+    allow_pickle = args.allow_pickle
 
     # Arguments checking
     if not auxiliary.isfile(modelpath):
@@ -116,9 +118,9 @@ if __name__ == "__main__":
 
     test_model(
         model.load_model(modelpath),
-        x=auxiliary.load_npy(x_filepath),
-        y=auxiliary.load_npy(y_filepath),
-        id_filepath=auxiliary.load_npy(id_filepath),
+        x=auxiliary.load_npy(x_filepath, allow_pickle=allow_pickle),
+        y=auxiliary.load_npy(y_filepath, allow_pickle=allow_pickle),
+        id=auxiliary.load_npy(id_filepath, allow_pickle=allow_pickle),
         save_to=output_dir,
         lab=label,
         metric="mse"

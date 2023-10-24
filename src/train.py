@@ -305,6 +305,7 @@ if __name__ == "__main__":
     parser.add_argument('-o', '--model_output', type=str, default="./out/", help="output directory for the model")
     parser.add_argument('-g', '--graph_output', type=str, default="./out/", help="output directory for the plots")
     parser.add_argument('-w', '--overwrite', action='store_false', help="should we overwrite model after training ?")
+    parser.add_argument('-a', '--allow_pickle', action='store_false', help="allow pickle numpy argument")
 
     # Arguments retrieving
     args = parser.parse_args()
@@ -335,6 +336,8 @@ if __name__ == "__main__":
     output_model_dir = args.model_output
     output_graph_dir = args.graph_output
     overwrite = args.overwrite
+    # allow_pickle
+    allow_pickle = args.allow_pickle
 
     # Arguments checking
     if not auxiliary.isfile(x_train_path):
@@ -395,8 +398,8 @@ if __name__ == "__main__":
 
     # Model training
     train_model(model_link,
-                *auxiliary.load_npy_xy(x_train_path, y_train_path),
-                *auxiliary.load_npy_xy(x_val_path, y_val_path),
+                *auxiliary.load_npy_xy(x_train_path, y_train_path, allow_pickle=allow_pickle),
+                *auxiliary.load_npy_xy(x_val_path, y_val_path, allow_pickle=allow_pickle),
                 save_graph_to=output_graph_dir,
                 save_md_to=output_model_dir,
                 overwrite=overwrite,
@@ -410,5 +413,6 @@ if __name__ == "__main__":
                 l2=l2,
                 dropout=dropout,
                 savebest=savebest,
-                patience=patience
+                patience=patience,
+                allow_pickle=allow_pickle
     )
