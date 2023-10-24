@@ -17,7 +17,7 @@ import auxiliary
 
 
 def test_model(model, x, y, id=None,
-               model_name="unknown", lab=None, metric="mse",
+               model_name="unknown", lab=None, metric="",
                save_to=None, overwrite=False
 ):
     """"""
@@ -40,26 +40,30 @@ def test_model(model, x, y, id=None,
             title_DMS = f"{id_seq} - DMS" + to_title
             indices = np.arange(r_obs.shape[0])
             # Plot 2A3
+            filename_2A3 = f"R2={r2_2A3:2.4f}_{id_seq}_2A3"
+            filename_2A3 = f"{lab}_{filename_2A3}" if lab is not None else filename_2A3
             ## Metrics
             isnotnan = ~np.isnan(r_obs[:, 0]) & ~np.isnan(r_pred[:, 0])
             r2_2A3 = r2_score(r_obs[:, 0][isnotnan], r_pred[:, 0][isnotnan])
             plots.plot(indices, r_obs[:, 0], r_pred[:, 0],
                        title=title_2A3, metric=metric, r2=r2_2A3,
                        xlabel=xlabel, ylabel=ylabel,
-                       filename=f"R2={r2_2A3:2.4f}_{id_seq}_2A3",
+                       filename=filename_2A3,
                        forcename=True,
                        save_to=save_to)
 
             plt.clf()  # Clear plot
 
             # Plot DMS
+            filename_DMS = f"R2={r2_DMS:2.4f}_{id_seq}_DMS"
+            filename_DMS = f"{lab}_{filename_DMS}" if lab is not None else filename_DMS
             ## Metrics
             isnotnan = ~np.isnan(r_obs[:, 1]) & ~np.isnan(r_pred[:, 1])
             r2_DMS = r2_score(r_obs[:, 1][isnotnan], r_pred[:, 1][isnotnan])
             plots.plot(indices, r_obs[:, 1], r_pred[:, 1],
                        title=title_DMS, metric=metric, r2=r2_DMS,
                        xlabel=xlabel, ylabel=ylabel,
-                       filename=f"R2={r2_DMS:2.4f}_{id_seq}_DMS",
+                       filename=filename_DMS,
                        forcename=True,
                        save_to=save_to)
 
@@ -73,26 +77,30 @@ def test_model(model, x, y, id=None,
             indices = np.arange(r_obs.shape[0])
 
             # Plot 2A3
+            filename_2A3 = f"R2={r2_2A3:.4f}_2A3"
+            filename_2A3 = f"{lab}_{filename_2A3}" if lab is not None else filename_2A3
             ## Metrics
             isnotnan = ~np.isnan(r_obs[:, 0]) & ~np.isnan(r_pred[:, 0])
             r2_2A3 = r2_score(r_obs[:, 0][isnotnan], r_pred[:, 0][isnotnan])
             plots.plot(indices, r_obs[:, 0], r_pred[:, 0],
                        title=title_2A3, metric=metric, r2=r2_2A3,
                        xlabel=xlabel, ylabel=ylabel,
-                       filename=f"R2={r2_2A3:.4f}_2A3",
+                       filename=filename_2A3,
                        forcename=True,
                        save_to=save_to)
 
             plt.clf()  # Clear plot
 
             # Plot DMS
+            filename_DMS = f"R2={r2_DMS:.4f}_DMS"
+            filename_DMS = f"{lab}_{filename_DMS}" if lab is not None else filename_DMS
             ## Metrics
             isnotnan = ~np.isnan(r_obs[:, 1]) & ~np.isnan(r_pred[:, 1])
             r2_DMS = r2_score(r_obs[:, 1][isnotnan], r_pred[:, 1][isnotnan])
             plots.plot(indices, r_obs[:, 1], r_pred[:, 1],
                        title=title_DMS, metric=metric, r2=r2_DMS,
                        xlabel=xlabel, ylabel=ylabel,
-                       filename=f"R2={r2_DMS:.4f}_DMS",
+                       filename=filename_DMS,
                        forcename=True,
                        save_to=save_to)
 
