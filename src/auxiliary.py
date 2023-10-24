@@ -182,7 +182,7 @@ def append_suffix(filepath, path_sep="/", suffix_sep="_"):
     return filepath_suffix
 
 
-def train_val_test_split(x, y, train_size=0.7, val_size=0.15, seed=42):
+def train_val_test_split(x, y, i=None, train_size=0.7, val_size=0.15, seed=42):
     """Returns the train, validation and test set from a given data."""
     if train_size + val_size >= 1:
         train_size=0.7
@@ -190,6 +190,18 @@ def train_val_test_split(x, y, train_size=0.7, val_size=0.15, seed=42):
 
     # Test proportion
     test_size = 1 - train_size - val_size
+    if i is not None:
+        # Define train data
+        x_train, x_val_test, y_train, y_val_test, i_train, i_val_test = train_test_split(
+            x, y, i, test_size=1-train_size, random_state=seed
+        )
+        # Define val and test data
+        x_val, x_test, y_val, y_test, i_val, i_test = train_test_split(
+            x_val_test, y_val_test, i_val_test, test_size=test_size/(1-train_size), random_state=seed
+        )
+
+        return x_train, x_val, x_test, y_train, y_val, y_test, i_train, i_val, i_test
+
     # Define train data
     x_train, x_val_test, y_train, y_val_test = train_test_split(
         x, y, test_size=1-train_size, random_state=seed

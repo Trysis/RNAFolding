@@ -23,7 +23,8 @@ SELECT_OPTIMIZERS = {
 
 SELECT_MODELS = {
     "simple_lstm": model.simple_lstm,
-    "bidirect": model.bilstm
+    "bidirect": model.bilstm,
+    "tsfm": model.transfor
 }
 
 SELECT_LOSS = {
@@ -258,7 +259,6 @@ def train_model(model_link, x_train, y_train, x_val=None, y_val=None,
         indices = np.arange(len(losses))
         if x_val is not None:
             val_losses = history.history["val_loss"]
-            print(losses)
             plots.plot(indices,
                        losses,
                        val_losses,

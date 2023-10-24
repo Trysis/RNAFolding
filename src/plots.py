@@ -12,6 +12,7 @@ from sklearn.metrics import r2_score
 # Local modules
 import auxiliary
 
+
 def legend_patch(label, color="none"):
     """Returns the corresponding label with a Patch object for matplotlib legend purposes.
     
@@ -25,6 +26,7 @@ def legend_patch(label, color="none"):
 
     """
     return label, mpatches.Patch(color=color, label=label)
+
 
 def single_plot(yvalues, xvalues=None, scale = "linear", mode="plot",
                 title="", metric="", xlabel="", ylabel="", alphas=(1,),
@@ -222,11 +224,13 @@ def single_plot(yvalues, xvalues=None, scale = "linear", mode="plot",
 
     return fig, ax
 
+
 def plot(indices, observed, predicted, scale = "linear", mode="plot",
          title="", metric="", xlabel="", ylabel="", alphas=(1, 1),
          xleft=None, xright=None, ytop=None, ybottom=None,
          r2=None, loss=None, normalize=False,
          save_to=None, filename="plot.png", overwrite=True,
+         showR2=True, showLoss=True, showY=True,
          lab_1="observed", lab_2="predicted",
          **kwargs
 ):
@@ -271,6 +275,9 @@ def plot(indices, observed, predicted, scale = "linear", mode="plot",
     normalize: bool
         Normalize values so that it is bound to [0; 1] values
         or [-1; 1] values if delta=True
+
+    lab_1, lab_2: str, str
+        Label associated with {observed} and {predicted} values
 
     Returns: tuple (matplotlib.figure, matplotlib.axes.Axes)
         Figure and Axes for graphical purposes
@@ -374,22 +381,25 @@ def plot(indices, observed, predicted, scale = "linear", mode="plot",
         main_legend = ax.legend(handles, labels, loc="upper left")
         ax.add_artist(main_legend)
 
-    # R2 & Loss Legend
-    handles_r2loss, labels_r2loss = [], []
-    ## R2
-    r2_label, r2_patch = legend_patch(f"R2 = {r2:.4f}")
-    handles_r2loss.append(r2_patch)
-    labels_r2loss.append(r2_label)
-    ## Loss
-    loss_label, loss_patch = legend_patch(f"loss = {loss:.4f}")
-    handles_r2loss.append(loss_patch)
-    labels_r2loss.append(loss_label)
+    if showR2 and showLoss:
+        # R2 & Loss Legend
+        handles_r2loss, labels_r2loss = [], []
+        if showR2:
+            ## R2
+            r2_label, r2_patch = legend_patch(f"R2 = {r2:.4f}")
+            handles_r2loss.append(r2_patch)
+            labels_r2loss.append(r2_label)
+        if showLoss:
+            ## Loss
+            loss_label, loss_patch = legend_patch(f"loss = {loss:.4f}")
+            handles_r2loss.append(loss_patch)
+            labels_r2loss.append(loss_label)
 
-    r2_loss_legend = ax.legend(handles_r2loss, labels_r2loss, loc="upper right",
-                               handlelength=0, handletextpad=0)
+            r2_loss_legend = ax.legend(handles_r2loss, labels_r2loss, loc="upper right",
+                                    handlelength=0, handletextpad=0)
 
-    # Add legend
-    ax.add_artist(r2_loss_legend)
+        # Add legend
+        ax.add_artist(r2_loss_legend)
 
     # Mean, std, median Legend
     if delta:
