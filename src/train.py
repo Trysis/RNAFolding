@@ -305,7 +305,7 @@ if __name__ == "__main__":
     parser.add_argument('-o', '--model_output', type=str, default="./out/", help="output directory for the model")
     parser.add_argument('-g', '--graph_output', type=str, default="./out/", help="output directory for the plots")
     parser.add_argument('-w', '--overwrite', action='store_false', help="should we overwrite model after training ?")
-    parser.add_argument('-a', '--allow_pickle', action='store_false', help="allow pickle numpy argument")
+    parser.add_argument('-z', '--allow_pickle', action='store_false', help="allow pickle numpy argument")
 
     # Arguments retrieving
     args = parser.parse_args()
@@ -396,6 +396,8 @@ if __name__ == "__main__":
     else:
         print("No GPU")
 
+
+    print(auxiliary.load_npy_xy(x_train_path, y_train_path, allow_pickle=allow_pickle)[1])
     # Model training
     train_model(model_link,
                 *auxiliary.load_npy_xy(x_train_path, y_train_path, allow_pickle=allow_pickle),
@@ -409,10 +411,8 @@ if __name__ == "__main__":
                 learning_rate=learning_rate,
                 loss_fn=loss_fn,
                 hidden_size=hidden_size,
-                l1=l1,
-                l2=l2,
+                l1=l1, l2=l2,
                 dropout=dropout,
                 savebest=savebest,
-                patience=patience,
-                allow_pickle=allow_pickle
+                patience=patience
     )

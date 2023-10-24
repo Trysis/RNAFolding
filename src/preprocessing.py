@@ -38,7 +38,7 @@ def dict_from_data(data, keys_name=["2A3_MaP", "DMS_MaP"]):
         for key in keys_name:
             mask = group["experiment_type"] == key
             seq_reactivity[seq][key] = group[mask].drop(
-                labels=["sequence", "experiment_type"], axis=1
+                labels=["sequence_id", "sequence", "experiment_type"], axis=1
             ).values.reshape(-1)
             seq_reactivity[seq][key] = np.expand_dims(seq_reactivity[seq][key], axis=1)
 
@@ -142,7 +142,6 @@ if __name__ == "__main__":
     # Save cleared_train_data as a CSV file
     csv_path = './data/cleared_data.csv'
     cleared_data.to_csv(csv_path, index=False)
-
     dict_data = dict_from_data(cleared_data)
     x, y, id = XY_from_dict(dict_data, encoder)
 
