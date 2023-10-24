@@ -23,7 +23,8 @@ SELECT_OPTIMIZERS = {
 
 SELECT_MODELS = {
     "simple_lstm": model.simple_lstm,
-    "bidirect": model.bilstm
+    "bidirect": model.bilstm,
+    "tsfm": model.transfor
 }
 
 SELECT_LOSS = {

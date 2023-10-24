@@ -1,5 +1,5 @@
 import keras
-
+import tensorflow as tf
 # Local modules
 import auxiliary as aux
 import loss
@@ -17,7 +17,7 @@ def simple_lstm(input_size=(457, 4), output_size=(2), to_compile=True, **kwargs)
 
     # BackPropagation algorithm and lr
     if to_compile:
-        set_optimizer(model=model, optimizer="adam", loss=loss.masked_loss_fn)
+        set_optimizer(model=model, optimizer=keras.optimizers.Adam(learning_rate=0.002), loss=loss.masked_loss_fn)
 
     return model
 
@@ -43,7 +43,29 @@ def bilstm(input_size=(457, 4), output_size=(2), to_compile=True, **kwargs):
 
     return model
 
+def transfor(input_size=(457, 4), output_size=(2), to_compile=True, **kwargs):
+    """Simple transformer model"""
+    # Model
+    model = keras.Sequential([
+        keras.layers.Input(shape=input_size),
+        TokenAndPositionEmbedding(*input_size, 32),
+        TransformerBlock(32, 2, 32),
+        keras.layers.GlobalAveragePooling1D(),
+        keras.layers.Dropout(0.1),
+        keras.layers.Dense(units=16, activation='relu'),
+        keras.layers.Dense(units=8, activation='relu'),
+        keras.layers.Dense(units=output_size, activation='linear')
+    ])
+
+    # BackPropagation algorithm and lr
+    if to_compile:
+        set_optimizer(model=model, optimizer=keras.optimizers.Adam(learning_rate=0.002),
+                      loss=loss.masked_loss_fn)
+
+    return model
+
 class TransformerBlock(keras.layers.Layer):
+    """From https://keras.io/examples/nlp/text_classification_with_transformer/"""
     def __init__(self, embed_dim, num_heads, ff_dim, rate=0.1):
         super().__init__()
         self.att = keras.layers.MultiHeadAttention(num_heads=num_heads, key_dim=embed_dim)
@@ -62,6 +84,20 @@ class TransformerBlock(keras.layers.Layer):
         ffn_output = self.ffn(out1)
         ffn_output = self.dropout2(ffn_output, training=training)
         return self.layernorm2(out1 + ffn_output)
+
+class TokenAndPositionEmbedding(keras.layers.Layer):
+    """From https://keras.io/examples/nlp/text_classification_with_transformer/"""
+    def __init__(self, maxlen, vocab_size, embed_dim):
+        super().__init__()
+        self.token_emb = keras.layers.Embedding(input_dim=vocab_size, output_dim=embed_dim)
+        self.pos_emb = keras.layers.Embedding(input_dim=maxlen, output_dim=embed_dim)
+
+    def call(self, x):
+        maxlen = tf.shape(x)[-1]
+        positions = tf.range(start=0, limit=maxlen, delta=1)
+        positions = self.pos_emb(positions)
+        x = self.token_emb(x)
+        return x + positions
 
 
 def set_optimizer(model, optimizer, loss):
