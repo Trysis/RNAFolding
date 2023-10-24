@@ -28,12 +28,12 @@ def bilstm(input_size=(457, 4), output_size=(2), to_compile=True, **kwargs):
     model = keras.Sequential([
         keras.layers.Input(shape=input_size),
         keras.layers.Bidirectional(
-            keras.layers.LSTM(units=256, return_sequences=True)
+            keras.layers.LSTM(units=32, return_sequences=True)
         ),
-        keras.layers.LSTM(units=128, return_sequences=True),
+        keras.layers.LSTM(units=32, return_sequences=True),
         keras.layers.Dropout(0.1),
-        keras.layers.Dense(units=64, activation='relu'),
-        keras.layers.Dense(units=32, activation='relu'),
+        keras.layers.Dense(units=16, activation='relu'),
+        keras.layers.Dense(units=8, activation='relu'),
         keras.layers.Dense(units=output_size, activation='linear')
     ])
 
@@ -42,6 +42,26 @@ def bilstm(input_size=(457, 4), output_size=(2), to_compile=True, **kwargs):
         set_optimizer(model=model, optimizer="adam", loss=loss.masked_loss_fn)
 
     return model
+
+class TransformerBlock(keras.layers.Layer):
+    def __init__(self, embed_dim, num_heads, ff_dim, rate=0.1):
+        super().__init__()
+        self.att = keras.layers.MultiHeadAttention(num_heads=num_heads, key_dim=embed_dim)
+        self.ffn = keras.Sequential(
+            [keras.layers.Dense(ff_dim, activation="relu"), layers.Dense(embed_dim),]
+        )
+        self.layernorm1 = keras.layers.LayerNormalization(epsilon=1e-6)
+        self.layernorm2 = keras.layers.LayerNormalization(epsilon=1e-6)
+        self.dropout1 = keras.layers.Dropout(rate)
+        self.dropout2 = keras.layers.Dropout(rate)
+
+    def call(self, inputs, training):
+        attn_output = self.att(inputs, inputs)
+        attn_output = self.dropout1(attn_output, training=training)
+        out1 = self.layernorm1(inputs + attn_output)
+        ffn_output = self.ffn(out1)
+        ffn_output = self.dropout2(ffn_output, training=training)
+        return self.layernorm2(out1 + ffn_output)
 
 
 def set_optimizer(model, optimizer, loss):
