@@ -5,6 +5,8 @@ import os
 
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.metrics import r2_score
 
 import keras
 
@@ -15,8 +17,8 @@ import auxiliary
 
 
 def test_model(model, x, y, id=None,
-               model_name="", lab=None, metric="mse",
-               save_to=None, kaggle_format=True
+               model_name="unknown", lab=None, metric="mse",
+               save_to=None, kaggle_format=True, overwrite=False
 ):
     """"""
     if save_to is not None and auxiliary.isdir(save_to):
@@ -28,26 +30,40 @@ def test_model(model, x, y, id=None,
     y_pred = model.predict(x)
     xlabel = "valeur observée"
     ylabel = "valeur prédite"
-
+    
+    save_to = auxiliary.create_dir(save_to + model_name, add_suffix=overwrite)
+    to_title = f"\n{model_name}" if lab is None else f"\n{model_name}\n{lab}"
     if id is not None:
         # Id
-        for id, r_obs, r_pred in zip(id, y_obs, y_pred):
-            to_title = "" if lab is None else f"\n{lab}"
-            title_2A3 = f"{id} - 2A3" + to_title
-            title_DMS = f"{id} - DMS" + to_title
-            indices = np.arange(id.shape[0])
-
+        for id_seq, r_obs, r_pred in zip(id, y_obs, y_pred):
+            title_2A3 = f"{id_seq} - 2A3" + to_title
+            title_DMS = f"{id_seq} - DMS" + to_title
+            indices = np.arange(r_obs.shape[0])
             # Plot 2A3
+            ## Metrics
+            isnotnan = ~np.isnan(r_obs[:, 0]) & ~np.isnan(r_pred[:, 0])
+            r2_2A3 = r2_score(r_obs[:, 0][isnotnan], r_pred[:, 0][isnotnan])
             plots.plot(indices, r_obs[:, 0], r_pred[:, 0],
-                       title=title_2A3, metric=metric,
+                       title=title_2A3, metric=metric, r2=r2_2A3,
                        xlabel=xlabel, ylabel=ylabel,
-                       filename=f"{id}_2A3", save_to=save_to)
+                       filename=f"R2={r2_2A3:2.4f}_{id_seq}_2A3",
+                       forcename=True,
+                       save_to=save_to)
+
+            plt.clf()  # Clear plot
 
             # Plot DMS
+            ## Metrics
+            isnotnan = ~np.isnan(r_obs[:, 1]) & ~np.isnan(r_pred[:, 1])
+            r2_DMS = r2_score(r_obs[:, 1][isnotnan], r_pred[:, 1][isnotnan])
             plots.plot(indices, r_obs[:, 1], r_pred[:, 1],
-                       title=title_DMS, metric=metric,
+                       title=title_DMS, metric=metric, r2=r2_DMS,
                        xlabel=xlabel, ylabel=ylabel,
-                       filename=f"{id}_DMS", save_to=save_to)
+                       filename=f"R2={r2_DMS:2.4f}_{id_seq}_DMS",
+                       forcename=True,
+                       save_to=save_to)
+
+            plt.close()
     else:
         # Without ID
         for r_obs, r_pred in zip(y_obs, y_pred):
@@ -57,17 +73,34 @@ def test_model(model, x, y, id=None,
             indices = np.arange(r_obs.shape[0])
 
             # Plot 2A3
+            ## Metrics
+            isnotnan = ~np.isnan(r_obs[:, 0]) & ~np.isnan(r_pred[:, 0])
+            r2_2A3 = r2_score(r_obs[:, 0][isnotnan], r_pred[:, 0][isnotnan])
             plots.plot(indices, r_obs[:, 0], r_pred[:, 0],
-                       title=title_2A3, metric=metric,
+                       title=title_2A3, metric=metric, r2=r2_2A3,
                        xlabel=xlabel, ylabel=ylabel,
-                       filename=f"2A3", save_to=save_to)
+                       filename=f"R2={r2_2A3:.4f}_2A3",
+                       forcename=True,
+                       save_to=save_to)
+
+            plt.clf()  # Clear plot
 
             # Plot DMS
+            ## Metrics
+            isnotnan = ~np.isnan(r_obs[:, 1]) & ~np.isnan(r_pred[:, 1])
+            r2_DMS = r2_score(r_obs[:, 1][isnotnan], r_pred[:, 1][isnotnan])
             plots.plot(indices, r_obs[:, 1], r_pred[:, 1],
-                       title=title_DMS, metric=metric,
+                       title=title_DMS, metric=metric, r2=r2_DMS,
                        xlabel=xlabel, ylabel=ylabel,
-                       filename=f"DMS", save_to=save_to)
+                       filename=f"R2={r2_DMS:.4f}_DMS",
+                       forcename=True,
+                       save_to=save_to)
 
+            plt.close()
+
+
+def read_test_submission(kaggle_format, save_to):
+    """Does not work for the moment"""
     if kaggle_format:
         # Create the "sample_submission" DataFrame
         sample_submission = pd.DataFrame({
@@ -80,9 +113,6 @@ def test_model(model, x, y, id=None,
         sample_path = save_to + 'sample_submission.csv'
         sample_submission.to_csv(sample_path, index=False)
         print(f"Save sample submission to {sample_path}")
-        
-
-        
 
 
 if __name__ == "__main__":

@@ -32,8 +32,8 @@ def single_plot(yvalues, xvalues=None, scale = "linear", mode="plot",
                 title="", metric="", xlabel="", ylabel="", alphas=(1,),
                 xleft=None, xright=None, ytop=None, ybottom=None,
                 loss=None, normalize=False, overwrite=True,
-                save_to=None, filename="plot.png",
-                showLoss=True, showY=True,
+                save_to=None, filename="plot",
+                showLoss=True, showY=True, ext="png",
                 pltlab="", **kwargs
 ):
     """Generate a specified figure from a set of values.
@@ -216,7 +216,7 @@ def single_plot(yvalues, xvalues=None, scale = "linear", mode="plot",
         root = root if root.isalnum() else f"plot_{mode}"
         # Save file to
         save_to = auxiliary.to_dirpath(save_to)
-        filename = auxiliary.replace_extension(root, "png")
+        filename = auxiliary.replace_extension(root, ext)
         filepath = save_to + filename if overwrite else \
                    auxiliary.filepath_with_suffix(save_to + filename)
 
@@ -229,9 +229,10 @@ def plot(indices, observed, predicted, scale = "linear", mode="plot",
          title="", metric="", xlabel="", ylabel="", alphas=(1, 1),
          xleft=None, xright=None, ytop=None, ybottom=None,
          r2=None, loss=None, normalize=False,
-         save_to=None, filename="plot.png", overwrite=True,
+         save_to=None, overwrite=True, filename="plot", ext="png",
          showR2=True, showLoss=True, showDelta=True,
-         showObs=True, showPred=True, ignore_nan=True,
+         showObs=True, showPred=True,
+         ignore_nan=True, forcename=False,
          lab_1="observed", lab_2="predicted",
          **kwargs
 ):
@@ -264,14 +265,52 @@ def plot(indices, observed, predicted, scale = "linear", mode="plot",
         Title, x-axis and y-axis labels to assign to
         the figure
 
+    metric: str
+        Name of the supervised metric
+    
+    xlabel, ylabel: str, str
+        X and Y axis label
+
+    alphas: tuple(float), optional
+        alpha values for the plot
+
     xleft, xright: float, optional
         lower and upper x limit
 
     ybottom, ytop: int, optional
         lower and upper y limit
 
-    alphas: tuple(float), optional
-        alpha values for the plot
+    r2, loss: float, float
+        R2 and Loss metric, if not specified it
+        Pearson correlation and MSE will be calculated
+        betweend observed and predictions
+
+    save_to: str
+        Directory to save plot to
+
+    overwrite: str
+        If a plot have the same name as our, should we
+        overwrite ? If not, it creates a filename with
+        an appended suffix
+
+    filename: str
+        Name of the file to create
+
+    ext: str
+        Extension of the file to create
+
+    showR2, showLoss, showDelta, showObs, showPred: bool
+        Should the associated metric or label legend be showed ?
+
+    ignore_nan: bool
+        If observed or predicted values contains NaN,
+        should we ignore them ?
+
+    forcename: bool
+        It True, then filename will exactly be the same
+        as specified. Only the extension will be appended.
+        Else, extension is replaced by detecting the last "."
+        character to replace it.
 
     normalize: bool
         Normalize values so that it is bound to [0; 1] values
@@ -495,12 +534,15 @@ def plot(indices, observed, predicted, scale = "linear", mode="plot",
         if not auxiliary.isdir(save_to):
             raise Exception("Specified directory does not exists")
 
-        root, _ = os.path.splitext(filename)
-        # Save file to
+        ext = ext.replace(".", "")
         save_to = auxiliary.to_dirpath(save_to)
-        filename = auxiliary.replace_extension(root, "png")
-        filepath = save_to + filename if overwrite else \
-                   auxiliary.filepath_with_suffix(save_to + filename)
+        filepath = save_to + filename + "." + ext
+        if not forcename:
+            root, _ = os.path.splitext(filename)
+            # Save file to
+            filename = auxiliary.replace_extension(root, ext)
+            filepath = save_to + filename if overwrite else \
+                    auxiliary.filepath_with_suffix(save_to + filename)
 
         plt.savefig(filepath, bbox_inches = 'tight')
 

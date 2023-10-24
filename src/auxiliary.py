@@ -35,6 +35,9 @@ def create_dir(dirpath, add_suffix=False):
     if add_suffix:
         dirpath = append_suffix(dirpath)
 
+    if os.path.exists(dirpath):
+        return dirpath
+
     os.mkdir(dirpath)
     return dirpath
 
