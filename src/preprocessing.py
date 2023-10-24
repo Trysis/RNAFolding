@@ -19,6 +19,7 @@ import auxiliary
 RNA_BASES = [["A"], ["U"], ["C"], ["G"]]
 encoder = OneHotEncoder(handle_unknown='ignore', sparse_output=False).fit(RNA_BASES)
 
+
 # Function to keep rows with maximum signal_to_noise within identical sequences
 def filter_identical_sequences(df):
     # Group by 'sequence' and keep the row with max 'signal_to_noise'

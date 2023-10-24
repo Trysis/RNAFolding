@@ -12,6 +12,7 @@ import model
 import plots
 import auxiliary
 
+
 def test_model(model, x, y, id=None, lab=None, metric="mse", save_to=None, kaggle_format=True):
     if save_to is not None and auxiliary.isdir(save_to):
         save_to = auxiliary.to_dirpath(save_to)
@@ -23,13 +24,11 @@ def test_model(model, x, y, id=None, lab=None, metric="mse", save_to=None, kaggl
     xlabel = "valeur observée"
     ylabel = "valeur prédite"
     if id is not None:
-        print(f"\n{id}\n")
         # Id
         for id, r_obs, r_pred in zip(id, y_obs, y_pred):
             to_title = "" if lab is None else f"\n{lab}"
             title_2A3 = f"{id} - 2A3" + to_title
             title_DMS = f"{id} - DMS" + to_title
-            print(id)
             indices = np.arange(id.shape[0])
 
             # Plot 2A3

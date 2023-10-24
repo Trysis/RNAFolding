@@ -29,10 +29,14 @@ def to_dirpath(dirpath, dir_sep="/"):
 
 def create_dir(dirpath, add_suffix=False):
     """Create a directory."""
-    if isdir(os.path.dirname(dirpath)):
-        if add_suffix:
-            dirpath = append_suffix(dirpath)
-        os.mkdir(dirpath)
+    if not isdir(os.path.dirname(dirpath)):
+        return None
+
+    if add_suffix:
+        dirpath = append_suffix(dirpath)
+
+    os.mkdir(dirpath)
+    return dirpath
 
 
 def save_npy(x, filepath_x, *args):

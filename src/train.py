@@ -396,8 +396,6 @@ if __name__ == "__main__":
     else:
         print("No GPU")
 
-
-    print(auxiliary.load_npy_xy(x_train_path, y_train_path, allow_pickle=allow_pickle)[1])
     # Model training
     train_model(model_link,
                 *auxiliary.load_npy_xy(x_train_path, y_train_path, allow_pickle=allow_pickle),
