@@ -27,6 +27,14 @@ def to_dirpath(dirpath, dir_sep="/"):
     return dirpath
 
 
+def create_dir(dirpath, add_suffix=False):
+    """Create a directory."""
+    if isdir(os.path.dirname(dirpath)):
+        if add_suffix:
+            dirpath = append_suffix(dirpath)
+        os.mkdir(dirpath)
+
+
 def save_npy(x, filepath_x, *args):
     """Save a set of numpy array.
     
@@ -101,9 +109,8 @@ def min_max_normalization(values, min_scale, max_scale, ignore_nan=True):
         Normalized array in range [min_scale, max_scale]
 
     """
-    min_val, max_val = values.min(), values.max() if not ignore_nan else \
-                       np.nanmin(values), np.nanmax(values)
-
+    min_val = values.min() if not ignore_nan else np.nanmin(values)
+    max_val = values.max() if not ignore_nan else np.nanmax(values)
     # Normalization
     scale_plage = max_scale - min_scale
     val_plage = max_val - min_val
@@ -159,8 +166,9 @@ def append_suffix(filepath, path_sep="/", suffix_sep="_"):
     """
     # If no existing file to the path exists
     # ,we return the actual path
-    if not os.path.isfile(filepath):
+    if not os.path.exists(filepath):
         return filepath
+    filepath = filepath if filepath[-1] != path_sep else filepath[:-1]
     # Else we append a suffix
     dirname = os.path.dirname(filepath)  # directory name
     dirname = "." if dirname == "" else dirname
