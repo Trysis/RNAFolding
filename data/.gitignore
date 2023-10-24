@@ -1,5 +1,2 @@
-SN_filtered_data.csv
-test_sequences.csv
-train_data.csv
 *.csv
 *.npy
