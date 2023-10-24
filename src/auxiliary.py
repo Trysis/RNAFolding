@@ -49,7 +49,7 @@ def save_npy(x, filepath_x, *args):
 
 def load_npy(path, **kwargs):
     """Load a npy binary file from a specified path"""
-    if not isfile(path):
+    if (path is None) or (not isfile(path)):
         return None
 
     return np.load(path, **kwargs)

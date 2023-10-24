@@ -6,9 +6,11 @@ import numpy as np
 import pandas as pd
 
 import keras
+
 # Local modules
-import auxiliary
+import model
 import plots
+import auxiliary
 
 def test_model(model, x, y, id=None, lab=None, metric="mse", save_to=None, kaggle_format=True):
     if save_to is not None and auxiliary.isdir(save_to):
@@ -87,16 +89,20 @@ if __name__ == "__main__":
     # Input Data
     parser.add_argument('model', type=str, help="File path to saved model file.")
     parser.add_argument('x_path', nargs='?', type=str, default="./data/x_val.npy", help="Filepath to X file.")
+    parser.add_argument('y_path', nargs='?', type=str, default="./data/y_val.npy", help="Filepath to Y file.")
     parser.add_argument('-i', '--identifiant', type=str, default="./data/i_val.npy", help="Filepath indicating id associated with X")
     parser.add_argument('-o', '--output_dir', type=str, default="./out/", help="output directory")
+    parser.add_argument('-l', '--label', type=str, default="train", help="label associated with the collected data")
 
     # Arguments retrieving
     args = parser.parse_args()
     # -- Main args
     modelpath = args.model
     x_filepath = args.x_path
+    y_filepath = args.y_path
     id_filepath = args.identifiant
     output_dir = args.output_dir
+    label = args.label
 
     # Arguments checking
     if not auxiliary.isfile(modelpath):
@@ -108,3 +114,13 @@ if __name__ == "__main__":
     if not auxiliary.isdir(output_dir):
         raise Exception("Output directory is invalid")
 
+    test_model(
+        model.load_model(modelpath),
+        x=auxiliary.load_npy(x_filepath),
+        y=auxiliary.load_npy(y_filepath),
+        id_filepath=auxiliary.load_npy(id_filepath),
+        save_to=output_dir,
+        lab=label,
+        metric="mse"
+
+    )

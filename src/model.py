@@ -108,6 +108,11 @@ def set_optimizer(model, optimizer, loss):
     return model
 
 
+def load_model(modelpath, compile=False, **kwargs):
+    model = keras.saving.load_model(modelpath, compile=False)
+    return model
+
+
 def save_model(model, dirpath="", dir_sep="/", filename="model", ext="keras"):
     if not aux.isdir(dirpath):
         raise Exception("Dirpath is invalid")
