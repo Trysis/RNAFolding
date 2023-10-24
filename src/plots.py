@@ -12,6 +12,7 @@ from sklearn.metrics import r2_score
 # Local modules
 import auxiliary
 
+
 def legend_patch(label, color="none"):
     """Returns the corresponding label with a Patch object for matplotlib legend purposes.
     
@@ -27,11 +28,209 @@ def legend_patch(label, color="none"):
     return label, mpatches.Patch(color=color, label=label)
 
 
+def single_plot(yvalues, xvalues=None, scale = "linear", mode="plot",
+                title="", metric="", xlabel="", ylabel="", alphas=(1,),
+                xleft=None, xright=None, ytop=None, ybottom=None,
+                loss=None, normalize=False, overwrite=True,
+                save_to=None, filename="plot.png",
+                showLoss=True, showY=True,
+                pltlab="", **kwargs
+):
+    """Generate a specified figure from a set of values.
+
+    yvalues: Iterator (numpy.ndarray)
+        Values to plot, correspond to y axis
+
+    xvalues: Iterator (numpy.ndarray)
+        Values in x axis
+
+    scale: str
+        Chosen scale for observed and predicted values
+        "linear", "log", ...
+
+    mode: str
+        Selected mode for plot taking values such as 
+        "plot" -> line plot
+        "bar" -> barplot plot
+        "hist" -> histogram plot
+        "hist2d" -> histogram2d plot
+        "scatter" -> scatter plot
+        "violin" -> violin plot
+
+    title, xlabel, ylabel: str
+        Title, x-axis and y-axis labels to assign to
+        the figure
+
+    xleft, xright: float, optional
+        lower and upper x limit
+
+    ybottom, ytop: int, optional
+        lower and upper y limit
+
+    alphas: tuple(float), optional
+        alpha values for the plot
+
+    normalize: bool
+        Normalize values so that it is bound to [0; 1]
+
+    Returns: tuple (matplotlib.figure, matplotlib.axes.Axes)
+        Figure and Axes for graphical purposes
+
+    """
+    # Plot mode selection
+    plotting_mode = {
+        "plot": lambda ax: ax.plot,
+        'bar': lambda ax: ax.bar,
+        "hist": lambda ax: ax.hist,
+        "scatter": lambda ax: ax.scatter,
+        "hist2d": lambda ax: ax.hist2d,
+        "violin": lambda ax: ax.violinplot
+    }
+    # Check mode
+    if mode not in plotting_mode.keys():
+        raise Exception("Selected mode is invalid")
+
+    # x-axis equals indices if not set
+    if xvalues is None:
+        xvalues = np.arange(yvalues.shape[0])
+
+    alphas = (1,) if alphas is None else alphas
+    alphas = (alphas, ) if isinstance(alphas, (int, float)) else tuple(alphas)
+    alphas = alphas + (1,)
+
+    # Optional arguments
+    if mode.startswith("hist"):
+        kwargs["bins"] = kwargs.get("bins", 100)  # necessary if mode == "hist"/"hist2d"
+        kwargs["cmap"] = kwargs.get("cmLoadap", plt.cm.jet)
+        kwargs["norm"] = kwargs.get("norm", mcolors.LogNorm())
+
+    xticks = kwargs.get("xticks", None)
+    yticks = kwargs.get("yticks", None)
+    grid = kwargs.get("grid", False)
+
+    # Conversion
+    if not isinstance(yvalues, np.ndarray):
+        yvalues = np.array(yvalues)
+
+    if not isinstance(xvalues, np.ndarray):
+        xvalues = np.array(xvalues)
+
+    # Metrics
+    if normalize:
+        # Normalization needed before mean, std, median calculation
+        yvalues = auxiliary.normalization_min_max(yvalues, 0, 1)
+
+
+    # Observed and Predicted : Mean, std, median
+    mean_yvalues = yvalues.mean()
+    std_yvalues = yvalues.std()
+    median_yvalues = np.median(yvalues)
+
+    # Plot depending on mode
+    fig, ax = plt.subplots(figsize=(8, 7))
+    if (mode == "plot"):
+        plotting_mode[mode](ax)(xvalues, yvalues, label=pltlab, alpha=alphas[0], **kwargs)
+    elif (mode == "hist"):
+        bins=kwargs["bins"]
+        plotting_mode[mode](ax)(yvalues, bins=bins, label=pltlab, alpha=alphas[0])
+    elif (mode == "bar"):
+        plotting_mode[mode](ax)(xvalues, yvalues, label=pltlab, alpha=alphas[0], **kwargs)
+    elif (mode == "violin"):
+        v1 = plotting_mode[mode](ax)(yvalues, positions=[0], **kwargs)
+        labels = []
+        labels.append((mpatches.Patch(color=v1["bodies"][0].get_facecolor().flatten()), pltlab))
+        main_legend = ax.legend(*zip(*labels), loc=2)
+        ax.add_artist(main_legend)
+    elif (mode == "scatter"):
+        plotting_mode[mode](ax)(xvalues, yvalues, alpha=alphas[0], **kwargs)
+    elif (mode == "hist2d"):
+        plotting_mode[mode](ax)(xvalues, yvalues, **kwargs)
+
+    # 
+    if True:
+        # Main Legend
+        handles, labels = ax.get_legend_handles_labels()
+        if (handles != []) & (labels != []):
+            main_legend = ax.legend(handles, labels, loc="upper left")
+            ax.add_artist(main_legend)
+
+        ## Loss
+        if showLoss:
+            handles_loss, labels_loss = [], []
+            loss_label, loss_patch = legend_patch(f"loss = {loss:.4f}")
+            handles_loss.append(loss_patch)
+            labels_loss.append(loss_label)
+
+            loss_legend = ax.legend(handles_loss, labels_loss, loc="upper right",
+                                    handlelength=0, handletextpad=0)
+        if showY:
+            handles_y, labels_y = [], []
+            mean_yvalues_label, mean_yvalues_patch = legend_patch(f"mean = {mean_yvalues:.3f}")
+            std_yvalues_label, std_yvalues_patch = legend_patch(f"std = {std_yvalues:.3f}")
+            median_yvalues_label, median_yvalues_patch = legend_patch(f"median = {median_yvalues:.3f}")
+        
+            handles_y.extend([mean_yvalues_patch, std_yvalues_patch, median_yvalues_patch])
+            labels_y.extend([mean_yvalues_label, std_yvalues_label, median_yvalues_label])
+        
+            msm_observed_legend = fig.legend(handles_y, labels_y, title="observed",
+                                            handlelength=0, handletextpad=0, borderaxespad=0,
+                                            bbox_to_anchor=(1.06, 0.88))
+
+            # Add legend
+            ax.add_artist(msm_observed_legend)
+
+        # Add legend
+        ax.add_artist(loss_legend)
+
+    # Scale selected by user
+    ax.set_xscale(scale)
+    ax.set_yscale(scale)
+    # Option for specific mode
+    if (mode == "scatter"):
+        # Range to have xlim=ylim
+        xy_lim = auxiliary.min_max(ax.get_xlim() + ax.get_ylim())
+        ax.set_xlim(xy_lim)
+        ax.set_ylim(xy_lim)
+
+    # Set figure label, limit and legend
+    if xticks is not None:
+        ax.set_xticks(xticks)
+    if yticks is not None:
+        ax.set_yticks(yticks)
+
+    # Label
+    ax.set_title(title + f" - scale={scale}")
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    # Limit in x and y
+    ax.set_xlim(left=xleft, right=xright)
+    ax.set_ylim(top=ytop, bottom=ybottom)
+    # Grid
+    ax.grid(grid)
+
+    if save_to is not None:
+        if not auxiliary.isdir(save_to):
+            raise Exception("Specified directory does not exists")
+
+        root, _ = os.path.splitext(filename)
+        root = root if root.isalnum() else f"plot_{mode}"
+        # Save file to
+        save_to = auxiliary.to_dirpath(save_to)
+        filename = auxiliary.replace_extension(root, "png")
+        filepath = save_to + filename if overwrite else \
+                   auxiliary.filepath_with_suffix(save_to + filename)
+
+        plt.savefig(filepath, bbox_inches = 'tight')
+
+    return fig, ax
+
+
 def plot(indices, observed, predicted, scale = "linear", mode="plot",
          title="", metric="", xlabel="", ylabel="", alphas=(1, 1),
          xleft=None, xright=None, ytop=None, ybottom=None,
          r2=None, loss=None, normalize=False,
          save_to=None, filename="plot.png", overwrite=True,
+         showR2=True, showLoss=True, showY=True,
          lab_1="observed", lab_2="predicted",
          **kwargs
 ):
@@ -71,11 +270,14 @@ def plot(indices, observed, predicted, scale = "linear", mode="plot",
         lower and upper y limit
 
     alphas: tuple(float), optional
-        alpha values for values to plot
+        alpha values for the plot
 
     normalize: bool
         Normalize values so that it is bound to [0; 1] values
         or [-1; 1] values if delta=True
+
+    lab_1, lab_2: str, str
+        Label associated with {observed} and {predicted} values
 
     Returns: tuple (matplotlib.figure, matplotlib.axes.Axes)
         Figure and Axes for graphical purposes
@@ -94,6 +296,7 @@ def plot(indices, observed, predicted, scale = "linear", mode="plot",
     if mode not in plotting_mode.keys():
         raise Exception("Selected mode is invalid")
 
+    alphas = (1,) if alphas is None else alphas
     alphas = (alphas, ) if isinstance(alphas, (int, float)) else tuple(alphas)
     alphas = alphas + (1,)
     delta = True if mode.startswith("delta") else False
@@ -178,22 +381,25 @@ def plot(indices, observed, predicted, scale = "linear", mode="plot",
         main_legend = ax.legend(handles, labels, loc="upper left")
         ax.add_artist(main_legend)
 
-    # R2 & Loss Legend
-    handles_r2loss, labels_r2loss = [], []
-    ## R2
-    r2_label, r2_patch = legend_patch(f"R2 = {r2:.4f}")
-    handles_r2loss.append(r2_patch)
-    labels_r2loss.append(r2_label)
-    ## Loss
-    loss_label, loss_patch = legend_patch(f"loss = {loss:.4f}")
-    handles_r2loss.append(loss_patch)
-    labels_r2loss.append(loss_label)
+    if showR2 and showLoss:
+        # R2 & Loss Legend
+        handles_r2loss, labels_r2loss = [], []
+        if showR2:
+            ## R2
+            r2_label, r2_patch = legend_patch(f"R2 = {r2:.4f}")
+            handles_r2loss.append(r2_patch)
+            labels_r2loss.append(r2_label)
+        if showLoss:
+            ## Loss
+            loss_label, loss_patch = legend_patch(f"loss = {loss:.4f}")
+            handles_r2loss.append(loss_patch)
+            labels_r2loss.append(loss_label)
 
-    r2_loss_legend = ax.legend(handles_r2loss, labels_r2loss, loc="upper right",
-                               handlelength=0, handletextpad=0)
+            r2_loss_legend = ax.legend(handles_r2loss, labels_r2loss, loc="upper right",
+                                    handlelength=0, handletextpad=0)
 
-    # Add legend
-    ax.add_artist(r2_loss_legend)
+        # Add legend
+        ax.add_artist(r2_loss_legend)
 
     # Mean, std, median Legend
     if delta:
@@ -282,7 +488,7 @@ def plot(indices, observed, predicted, scale = "linear", mode="plot",
             raise Exception("Specified directory does not exists")
 
         root, _ = os.path.splitext(filename)
-        root = root if root.isalnum() else "plot"
+        root = root if root.isalnum() else f"plot_{mode}"
         # Save file to
         save_to = auxiliary.to_dirpath(save_to)
         filename = auxiliary.replace_extension(root, "png")
@@ -295,7 +501,7 @@ def plot(indices, observed, predicted, scale = "linear", mode="plot",
 
 
 if __name__ == "__main__":
-    indices = [1, 2, 2]
-    obs = [1, 2, 3]
+    indices = [0, 1, 2]
+    obs = [1, 2, 2]
     pred = [1.1, 2.2, 3.1]
-    plot(indices, obs, pred, save_to="./")
+    plot(indices, obs, pred, mode="plot", save_to="./")

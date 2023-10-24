@@ -49,13 +49,13 @@ def save_npy(x, filepath_x, *args):
 
 def load_npy(path, **kwargs):
     """Load a npy binary file from a specified path"""
-    if not isfile(path):
+    if (path is None) or (not isfile(path)):
         return None
 
     return np.load(path, **kwargs)
 
 
-def load_npy_xy(x_path, y_path):
+def load_npy_xy(x_path, y_path, **kwargs):
     """Load X and Y files from specified file paths.
     
     x_path: str
@@ -72,8 +72,8 @@ def load_npy_xy(x_path, y_path):
         x_exists = os.path.isfile(x_path)
         y_exists = os.path.isfile(y_path)
         if x_exists and y_exists:
-            x = np.load(x_path)
-            y = np.load(y_path)
+            x = np.load(x_path, **kwargs)
+            y = np.load(y_path, **kwargs)
         else:
             raise Exception("One of the path is invalid")
 
@@ -182,7 +182,7 @@ def append_suffix(filepath, path_sep="/", suffix_sep="_"):
     return filepath_suffix
 
 
-def train_val_test_split(x, y, train_size=0.7, val_size=0.15, seed=42):
+def train_val_test_split(x, y, i=None, train_size=0.7, val_size=0.15, seed=42):
     """Returns the train, validation and test set from a given data."""
     if train_size + val_size >= 1:
         train_size=0.7
@@ -190,6 +190,18 @@ def train_val_test_split(x, y, train_size=0.7, val_size=0.15, seed=42):
 
     # Test proportion
     test_size = 1 - train_size - val_size
+    if i is not None:
+        # Define train data
+        x_train, x_val_test, y_train, y_val_test, i_train, i_val_test = train_test_split(
+            x, y, i, test_size=1-train_size, random_state=seed
+        )
+        # Define val and test data
+        x_val, x_test, y_val, y_test, i_val, i_test = train_test_split(
+            x_val_test, y_val_test, i_val_test, test_size=test_size/(1-train_size), random_state=seed
+        )
+
+        return x_train, x_val, x_test, y_train, y_val, y_test, i_train, i_val, i_test
+
     # Define train data
     x_train, x_val_test, y_train, y_val_test = train_test_split(
         x, y, test_size=1-train_size, random_state=seed
