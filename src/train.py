@@ -258,13 +258,18 @@ def train_model(model_link, x_train, y_train, x_val=None, y_val=None,
         losses = history.history["loss"]
         indices = np.arange(len(losses))
         if x_val is not None:
+            plt_title = f"{auxiliary.replace_extension(model_name, '')}"
             val_losses = history.history["val_loss"]
             plots.plot(indices,
                        losses,
                        val_losses,
+                       title=plt_title,
+                       xlabel="epochs",
+                       ylabel="loss (mse)",
                        save_to=save_graph_to,
-                       filename=f"val_loss={val_losses[-1]:4.3f}_{model_name_png}",
-                       mode = "plot"
+                       filename=f"val_loss={val_losses[-1]:.3f}_{model_name_png}",
+                       mode = "plot",
+                       showLoss=False, showR2=False
                        )
 
     return history

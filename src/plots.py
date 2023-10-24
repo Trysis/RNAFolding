@@ -496,7 +496,6 @@ def plot(indices, observed, predicted, scale = "linear", mode="plot",
             raise Exception("Specified directory does not exists")
 
         root, _ = os.path.splitext(filename)
-        root = root if root.isalnum() else f"plot_{mode}"
         # Save file to
         save_to = auxiliary.to_dirpath(save_to)
         filename = auxiliary.replace_extension(root, "png")

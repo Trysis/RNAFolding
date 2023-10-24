@@ -141,8 +141,10 @@ def replace_extension(name, new_ext):
     """
     root, _ = os.path.splitext(name)
     new_ext = new_ext.replace(".", "")
-    name_ext = root + "." + new_ext
+    if new_ext == "":
+        return root
 
+    name_ext = root + "." + new_ext
     return name_ext
 
 

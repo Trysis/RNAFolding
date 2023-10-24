@@ -1,6 +1,7 @@
 """This script will be used to test the model on an X data."""
 
 import argparse
+import os
 
 import numpy as np
 import pandas as pd
@@ -13,7 +14,11 @@ import plots
 import auxiliary
 
 
-def test_model(model, x, y, id=None, lab=None, metric="mse", save_to=None, kaggle_format=True):
+def test_model(model, x, y, id=None,
+               model_name="", lab=None, metric="mse",
+               save_to=None, kaggle_format=True
+):
+    """"""
     if save_to is not None and auxiliary.isdir(save_to):
         save_to = auxiliary.to_dirpath(save_to)
     else:
@@ -23,6 +28,7 @@ def test_model(model, x, y, id=None, lab=None, metric="mse", save_to=None, kaggl
     y_pred = model.predict(x)
     xlabel = "valeur observée"
     ylabel = "valeur prédite"
+
     if id is not None:
         # Id
         for id, r_obs, r_pred in zip(id, y_obs, y_pred):
@@ -122,6 +128,7 @@ if __name__ == "__main__":
         x=auxiliary.load_npy(x_filepath, allow_pickle=allow_pickle),
         y=auxiliary.load_npy(y_filepath, allow_pickle=allow_pickle),
         id=auxiliary.load_npy(id_filepath, allow_pickle=allow_pickle),
+        model_name=auxiliary.replace_extension(os.path.basename(modelpath), ""),
         save_to=output_dir,
         lab=label,
         metric="mse"
