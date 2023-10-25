@@ -387,8 +387,9 @@ def plot(indices, observed, predicted, scale = "linear", mode="plot",
     delta_values = auxiliary.normalization_min_max(delta_values, -1, 1, ignore_nan=ignore_nan) if normalize else delta_values
 
     # Delta (Observed - Predicted) : Mean, std, median
-    mean_delta, std_delta = delta_values.mean(), delta_values.std()
-    median_delta = np.median(delta_values)
+    mean_delta = delta_values.mean() if not ignore_nan else np.nanmean(delta_values)
+    std_delta = delta_values.std() if not ignore_nan else np.nanstd(delta_values)
+    median_delta = np.median(delta_values) if not ignore_nan else np.nanmedian(delta_values)
 
     # Plot depending on mode
     fig, ax = plt.subplots(figsize=(8, 7))
@@ -502,7 +503,6 @@ def plot(indices, observed, predicted, scale = "linear", mode="plot",
     ax.set_yscale(scale)
     # Option for specific mode
     if (mode == "scatter"):
-        title += f" - scale={scale}"
         # Range to have xlim=ylim
         xy_lim = auxiliary.min_max(ax.get_xlim() + ax.get_ylim())
         ax.set_xlim(xy_lim)
@@ -521,7 +521,7 @@ def plot(indices, observed, predicted, scale = "linear", mode="plot",
         ax.set_yticks(yticks)
 
     # Label
-    ax.set_title(title)
+    ax.set_title(f"{title} ;scale={scale}")
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     # Limit in x and y

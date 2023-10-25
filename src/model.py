@@ -7,6 +7,7 @@ from tensorflow import keras
 import auxiliary as aux
 import loss
 
+
 def simple_lstm(input_size=(457, 4), output_size=(2), to_compile=True, **kwargs):
     """Simple lstm"""
     hidden_size = kwargs.get("hidden_size")
@@ -67,6 +68,7 @@ def transfor(input_size=(457, 4), output_size=(2), to_compile=True, **kwargs):
                       loss=loss.masked_loss_fn)
 
     return model
+
 
 def spot_rna(input_size=(457, 4), output_size=(2), to_compile=True, **kwargs) :
     """spot rna"""
