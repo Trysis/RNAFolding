@@ -93,7 +93,7 @@ def test_model(model, x, y, id=None,
             title_DMS = f"{id_seq} - DMS" + to_title
             # indices
             non_zero_idx = np.nonzero(np.sum(x_val, axis=1))
-            idx_nan_end = np.where(non_zero_idx)[0][-1]
+            idx_nan_end = non_zero_idx[0][-1] + 1
             indices = np.arange(idx_nan_end)
 
             # Plot 2A3
@@ -115,7 +115,7 @@ def test_model(model, x, y, id=None,
             ## Metrics
             isnotnan = ~np.isnan(r_obs[:, 1]) & ~np.isnan(r_pred[:, 1])
             r2_DMS = r2_score(r_obs[:, 1][isnotnan], r_pred[:, 1][isnotnan])
-            filename_DMS = f"R2={r2_DMS:2.4f}_{id_seq}_DMS"
+            filename_DMS = f"R2={r2_DMS:2.4f}_len={idx_nan_end}_{id_seq}_DMS"
             filename_DMS = f"{lab}_{filename_DMS}" if lab is not None else filename_DMS
             plots.plot(indices, r_obs[:, 1], r_pred[:, 1],
                        title=title_DMS, metric=metric, r2=r2_DMS,
