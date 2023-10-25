@@ -27,6 +27,21 @@ def to_dirpath(dirpath, dir_sep="/"):
     return dirpath
 
 
+def create_dir(dirpath, add_suffix=False):
+    """Create a directory."""
+    if not isdir(os.path.dirname(dirpath)):
+        return None
+
+    if add_suffix:
+        dirpath = append_suffix(dirpath)
+
+    if os.path.exists(dirpath):
+        return dirpath
+
+    os.mkdir(dirpath)
+    return dirpath
+
+
 def save_npy(x, filepath_x, *args):
     """Save a set of numpy array.
     
@@ -85,7 +100,7 @@ def min_max(arraylike):
     return min(arraylike), max(arraylike)
 
 
-def min_max_normalization(values, min_scale, max_scale):
+def min_max_normalization(values, min_scale, max_scale, ignore_nan=True):
     """Normalize values on a specified min and max range.
 
     values: array-like (numpy.ndarray) -> shape (n_samples, x)
@@ -101,8 +116,8 @@ def min_max_normalization(values, min_scale, max_scale):
         Normalized array in range [min_scale, max_scale]
 
     """
-    min_val, max_val = values.min(), values.max()
-
+    min_val = values.min() if not ignore_nan else np.nanmin(values)
+    max_val = values.max() if not ignore_nan else np.nanmax(values)
     # Normalization
     scale_plage = max_scale - min_scale
     val_plage = max_val - min_val
@@ -129,8 +144,10 @@ def replace_extension(name, new_ext):
     """
     root, _ = os.path.splitext(name)
     new_ext = new_ext.replace(".", "")
-    name_ext = root + "." + new_ext
+    if new_ext == "":
+        return root
 
+    name_ext = root + "." + new_ext
     return name_ext
 
 
@@ -158,8 +175,9 @@ def append_suffix(filepath, path_sep="/", suffix_sep="_"):
     """
     # If no existing file to the path exists
     # ,we return the actual path
-    if not os.path.isfile(filepath):
+    if not os.path.exists(filepath):
         return filepath
+    filepath = filepath if filepath[-1] != path_sep else filepath[:-1]
     # Else we append a suffix
     dirname = os.path.dirname(filepath)  # directory name
     dirname = "." if dirname == "" else dirname

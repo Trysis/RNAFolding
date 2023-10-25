@@ -7,6 +7,7 @@ from tensorflow import keras
 import auxiliary as aux
 import loss
 
+
 def simple_lstm(input_size=(457, 4), output_size=(2), to_compile=True, **kwargs):
     """Simple lstm"""
     hidden_size = kwargs.get("hidden_size")
@@ -65,6 +66,32 @@ def transfor(input_size=(457, 4), output_size=(2), to_compile=True, **kwargs):
     if to_compile:
         set_optimizer(model=model, optimizer=keras.optimizers.Adam(learning_rate=0.002),
                       loss=loss.masked_loss_fn)
+
+    return model
+
+
+def spot_rna(input_size=(457, 4), output_size=(2), to_compile=True, **kwargs) :
+    """spot rna"""
+    hidden_size = kwargs.get("hidden_size")
+    hidden_size = 32 if hidden_size is None else hidden_size
+    model = keras.Sequential([
+        keras.layers.Input(shape=input_size),
+        keras.layers.Bidirectional(
+            keras.layers.LSTM(units=hidden_size, return_sequences=True)
+            ),
+        keras.layers.LSTM(units=32, return_sequences=True),
+        keras.layers.Dropout(0.1),
+        keras.layers.Conv1D(filters=64, kernel_size=3, padding='causal', dilation_rate=1, activation='relu'),
+        keras.layers.Conv1D(filters=128, kernel_size=3, padding='causal', dilation_rate=2, activation='relu'),
+        keras.layers.Conv1D(filters=256, kernel_size=3, padding='causal', dilation_rate=4, activation='relu'),
+        keras.layers.Dense(units=16, activation='relu'),
+        keras.layers.Dense(units=8, activation='relu'),
+        keras.layers.Dense(units=output_size, activation='linear')
+    ])
+
+# BackPropagation algorithm and lr
+    if to_compile:
+        set_optimizer(model=model, optimizer=keras.optimizers.Adam(learning_rate=0.005), loss=loss.masked_loss_fn)
 
     return model
 

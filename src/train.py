@@ -24,7 +24,8 @@ SELECT_OPTIMIZERS = {
 SELECT_MODELS = {
     "simple_lstm": model.simple_lstm,
     "bidirect": model.bilstm,
-    "tsfm": model.transfor
+    "tsfm": model.transfor,
+    "spot": model.spot_rna
 }
 
 SELECT_LOSS = {
@@ -82,7 +83,7 @@ def load_model(model_link,
     """
     # Name of the model and Model
     model_name, model = "unknown.keras", None
-    if auxiliary.isfile(model_link):
+    if os.path.exists(model_link):
         # When path to model file is existant
         model = keras.saving.load_model(model_link, compile=False)
         model_name = os.path.basename(model_link)
@@ -258,13 +259,18 @@ def train_model(model_link, x_train, y_train, x_val=None, y_val=None,
         losses = history.history["loss"]
         indices = np.arange(len(losses))
         if x_val is not None:
+            plt_title = f"{auxiliary.replace_extension(model_name, '')}"
             val_losses = history.history["val_loss"]
             plots.plot(indices,
                        losses,
                        val_losses,
+                       title=plt_title,
+                       xlabel="epochs",
+                       ylabel="loss (mse)",
                        save_to=save_graph_to,
-                       filename=f"val_loss={val_losses[-1]:4.3f}_{model_name_png}",
-                       mode = "plot"
+                       filename=f"val_loss={val_losses[-1]:.3f}_{model_name_png}",
+                       mode = "plot",
+                       showLoss=False, showR2=False
                        )
 
     return history
@@ -396,8 +402,6 @@ if __name__ == "__main__":
     else:
         print("No GPU")
 
-
-    print(auxiliary.load_npy_xy(x_train_path, y_train_path, allow_pickle=allow_pickle)[1])
     # Model training
     train_model(model_link,
                 *auxiliary.load_npy_xy(x_train_path, y_train_path, allow_pickle=allow_pickle),
