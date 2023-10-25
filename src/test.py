@@ -16,7 +16,7 @@ import plots
 import auxiliary
 
 
-def test_model(model, x, y, id=None,
+def test_model(model, x, y, id=None, maxlen=207,
                model_name="unknown", lab=None, metric="",
                save_to=None, overwrite=False
 ):
@@ -30,12 +30,12 @@ def test_model(model, x, y, id=None,
     y_pred = model.predict(x)
     xlabel = "valeur observée"
     ylabel = "valeur prédite"
-    
     save_to = auxiliary.create_dir(save_to + model_name, add_suffix=overwrite)
     to_title = f"\n{model_name}" if lab is None else f"\n{model_name}\n{lab}"
     if id is not None:
         # Id
         for id_seq, r_obs, r_pred in zip(id, y_obs, y_pred):
+
             title_2A3 = f"{id_seq} - 2A3" + to_title
             title_DMS = f"{id_seq} - DMS" + to_title
             indices = np.arange(r_obs.shape[0])
@@ -45,6 +45,7 @@ def test_model(model, x, y, id=None,
             r2_2A3 = r2_score(r_obs[:, 0][isnotnan], r_pred[:, 0][isnotnan])
             filename_2A3 = f"R2={r2_2A3:2.4f}_{id_seq}_2A3"
             filename_2A3 = f"{lab}_{filename_2A3}" if lab is not None else filename_2A3
+
             plots.plot(indices, r_obs[:, 0], r_pred[:, 0],
                        title=title_2A3, metric=metric, r2=r2_2A3,
                        xlabel=xlabel, ylabel=ylabel,
