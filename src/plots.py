@@ -475,7 +475,7 @@ def plot(indices, observed, predicted, scale = "linear", mode="plot",
         
             msm_observed_legend = fig.legend(handles_obs, labels_obs, title="observed",
                                                 handlelength=0, handletextpad=0, borderaxespad=0,
-                                                bbox_to_anchor=(1.08, 0.88))
+                                                bbox_to_anchor=(1.06, 0.88))
 
             # Add legend
             ax.add_artist(msm_observed_legend)
@@ -492,7 +492,7 @@ def plot(indices, observed, predicted, scale = "linear", mode="plot",
         
             msm_predicted_legend = fig.legend(handles_pred, labels_pred, title="predicted",
                                                 handlelength=0, handletextpad=0, borderaxespad=0,
-                                                bbox_to_anchor=(1.08, 0.7))
+                                                bbox_to_anchor=(1.06, 0.7))
 
             # Add legend
             ax.add_artist(msm_predicted_legend)

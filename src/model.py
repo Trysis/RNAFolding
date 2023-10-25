@@ -48,7 +48,7 @@ def bilstm(input_size=(457, 4), output_size=(2), to_compile=True, **kwargs):
 
 
 def transfor(input_size=(457, 4), output_size=(2), to_compile=True, **kwargs):
-    """Simple transformer model (problem in shape)"""
+    """Simple transformer model"""
     # Model
     model = keras.Sequential([
         keras.layers.Input(shape=input_size),
