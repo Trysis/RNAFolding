@@ -55,6 +55,8 @@ def test_model(model, x, y, id=None,
                        title=f"{title_2A3_global}{to_title}",
                        metric=metric, r2=r2_2A3_global,
                        xlabel=xlabel, ylabel=ylabel,
+                       xleft=None if mode == "scatter" else -3,
+                       xright=None if mode == "scatter" else -3,
                        filename=filename_2A3_global,
                        alphas=(0.4, 0.4),
                        forcename=True,
@@ -100,14 +102,27 @@ def test_model(model, x, y, id=None,
             ## Metrics
             isnotnan = ~np.isnan(r_obs[:, 0]) & ~np.isnan(r_pred[:, 0])
             r2_2A3 = r2_score(r_obs[:, 0][isnotnan], r_pred[:, 0][isnotnan])
-            filename_2A3 = f"R2={r2_2A3:2.4f}_len={idx_nan_end}_{id_seq}_2A3"
-            filename_2A3 = f"{lab}_{filename_2A3}" if lab is not None else filename_2A3
-            plots.plot(indices, r_obs[:, 0], r_pred[:, 0],
-                       title=title_2A3, metric=metric, r2=r2_2A3,
-                       xlabel=xlabel, ylabel=ylabel,
-                       filename=filename_2A3, alphas=(0.7, 0.4),
-                       forcename=True,
-                       save_to=save_to)
+            if best_r2 is not None and worst_r2 is not None:
+                if (0 <= r2_2A3 <= worst_r2) or (r2_2A3 >= best_r2):
+                    filename_2A3 = f"R2={r2_2A3:2.4f}_len={idx_nan_end}_{id_seq}_2A3"
+                    filename_2A3 = f"{lab}_{filename_2A3}" if lab is not None else filename_2A3
+                    plots.plot(indices, r_obs[:, 0], r_pred[:, 0],
+                               title=title_2A3, metric=metric, r2=r2_2A3,
+                               xlabel=xlabel, ylabel=ylabel,
+                               filename=filename_2A3, alphas=(0.7, 0.4),
+                               forcename=True,
+                               save_to=save_to
+                              )
+            else:
+                filename_2A3 = f"R2={r2_2A3:2.4f}_len={idx_nan_end}_{id_seq}_2A3"
+                filename_2A3 = f"{lab}_{filename_2A3}" if lab is not None else filename_2A3
+                plots.plot(indices, r_obs[:, 0], r_pred[:, 0],
+                           title=title_2A3, metric=metric, r2=r2_2A3,
+                           xlabel=xlabel, ylabel=ylabel,
+                           filename=filename_2A3, alphas=(0.7, 0.4),
+                           forcename=True,
+                           save_to=save_to
+                          )
 
             plt.clf()  # Clear plot
 
@@ -115,14 +130,27 @@ def test_model(model, x, y, id=None,
             ## Metrics
             isnotnan = ~np.isnan(r_obs[:, 1]) & ~np.isnan(r_pred[:, 1])
             r2_DMS = r2_score(r_obs[:, 1][isnotnan], r_pred[:, 1][isnotnan])
-            filename_DMS = f"R2={r2_DMS:2.4f}_len={idx_nan_end}_{id_seq}_DMS"
-            filename_DMS = f"{lab}_{filename_DMS}" if lab is not None else filename_DMS
-            plots.plot(indices, r_obs[:, 1], r_pred[:, 1],
-                       title=title_DMS, metric=metric, r2=r2_DMS,
-                       xlabel=xlabel, ylabel=ylabel,
-                       filename=filename_DMS, alphas=(0.7, 0.4),
-                       forcename=True,
-                       save_to=save_to)
+            if best_r2 is not None and worst_r2 is not None:
+                if (0 <= r2_2A3 <= worst_r2) or (r2_2A3 >= best_r2):
+                    filename_DMS = f"R2={r2_DMS:2.4f}_len={idx_nan_end}_{id_seq}_DMS"
+                    filename_DMS = f"{lab}_{filename_DMS}" if lab is not None else filename_DMS
+                    plots.plot(indices, r_obs[:, 1], r_pred[:, 1],
+                               title=title_DMS, metric=metric, r2=r2_DMS,
+                               xlabel=xlabel, ylabel=ylabel,
+                               filename=filename_DMS, alphas=(0.7, 0.4),
+                               forcename=True,
+                               save_to=save_to
+                              )
+            else:
+                filename_DMS = f"R2={r2_DMS:2.4f}_len={idx_nan_end}_{id_seq}_DMS"
+                filename_DMS = f"{lab}_{filename_DMS}" if lab is not None else filename_DMS
+                plots.plot(indices, r_obs[:, 1], r_pred[:, 1],
+                           title=title_DMS, metric=metric, r2=r2_DMS,
+                           xlabel=xlabel, ylabel=ylabel,
+                           filename=filename_DMS, alphas=(0.7, 0.4),
+                           forcename=True,
+                           save_to=save_to
+                          )
 
             plt.close("all")
 
