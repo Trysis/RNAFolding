@@ -6,6 +6,7 @@ import os
 import re
 
 import numpy as np
+import pandas as pd
 from sklearn.model_selection import train_test_split
 
 
@@ -94,6 +95,13 @@ def load_npy_xy(x_path, y_path, **kwargs):
 
     return x, y
 
+
+def read_dataframe(filepath, **kwargs):
+    """Read a dataframe."""
+    if not isfile(filepath):
+        return None
+
+    return pd.read_csv(filepath, **kwargs)
 
 def min_max(arraylike):
     """Returns the min and max from an array."""
