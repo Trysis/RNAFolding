@@ -56,10 +56,11 @@ def test_model(model, x, y, id=None,
                        metric=metric, r2=r2_2A3_global,
                        xlabel=xlabel, ylabel=ylabel,
                        xleft=None if mode == "scatter" else -3,
-                       xright=None if mode == "scatter" else -3,
+                       xright=None if mode == "scatter" else 3,
                        filename=filename_2A3_global,
                        alphas=(0.4, 0.4),
                        forcename=True,
+                       bins=130,
                        save_to=save_to
                       )
 
