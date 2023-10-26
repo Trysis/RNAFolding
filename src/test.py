@@ -98,11 +98,11 @@ def test_model(model, x, y, id=None,
 
             # Plot 2A3
             ## Metrics
-            isnotnan = ~np.isnan(r_obs[:, 1]) & ~np.isnan(r_pred[:, 1])
-            r2_2A3 = r2_score(r_obs[:, 1][isnotnan], r_pred[:, 1][isnotnan])
+            isnotnan = ~np.isnan(r_obs[:, 0]) & ~np.isnan(r_pred[:, 0])
+            r2_2A3 = r2_score(r_obs[:, 0][isnotnan], r_pred[:, 0][isnotnan])
             filename_2A3 = f"R2={r2_2A3:2.4f}_len={idx_nan_end}_{id_seq}_2A3"
             filename_2A3 = f"{lab}_{filename_2A3}" if lab is not None else filename_2A3
-            plots.plot(indices, r_obs[:, 1], r_pred[:, 1],
+            plots.plot(indices, r_obs[:, 0], r_pred[:, 0],
                        title=title_2A3, metric=metric, r2=r2_2A3,
                        xlabel=xlabel, ylabel=ylabel,
                        filename=filename_2A3, alphas=(0.7, 0.4),
