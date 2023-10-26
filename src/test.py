@@ -260,13 +260,13 @@ if __name__ == "__main__":
     modelpath = args.model.strip()
     x_filepath = args.x_path.strip()
     y_filepath = args.y_path.strip()
-    id_filepath = args.identifiant.strip()
+    id_filepath = args.identifiant
     output_dir = args.output_dir.strip()
-    label = args.label.strip()
+    label = args.label
     allow_pickle = args.allow_pickle
 
     # Arguments checking
-    if not auxiliary.isfile(modelpath):
+    if not os.path.exists(modelpath):
         raise Exception(f"Path to model file is incorrect :\n\t{modelpath}")
 
     if not auxiliary.isfile(x_filepath):
