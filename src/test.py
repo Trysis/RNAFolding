@@ -60,7 +60,6 @@ def test_model(model, x, y, id=None,
                        filename=filename_2A3_global,
                        alphas=(0.4, 0.4),
                        forcename=True,
-                       bins=130,
                        save_to=save_to
                       )
 

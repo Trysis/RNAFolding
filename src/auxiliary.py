@@ -99,9 +99,10 @@ def load_npy_xy(x_path, y_path, **kwargs):
 def read_dataframe(filepath, **kwargs):
     """Read a dataframe."""
     if not isfile(filepath):
-        return None
+        raise Exception("Filepath is invalid")
 
     return pd.read_csv(filepath, **kwargs)
+
 
 def min_max(arraylike):
     """Returns the min and max from an array."""

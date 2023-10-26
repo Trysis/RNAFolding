@@ -4,7 +4,7 @@ import re
 # Pattern
 r2_pattern = re.compile("R2=")
 
-dirpath = "../out/bidirect"
+dirpath = "./out/bidirect"
 fileindir = os.listdir(dirpath)
 file_query = [fich[f.span()[1]:-8].split("_") for fich in fileindir \
               if (f := r2_pattern.search(fich)) is not None]
