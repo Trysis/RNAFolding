@@ -107,6 +107,27 @@ def reactivity_normalization(df_2A3_MaP, df_DMS_MaP, y_columns):
     return df_2A3_MaP, df_DMS_MaP
 
 
+def getReactivities(filepath,
+                    key_2A3="2A3_MaP",
+                    key_DMS="DMS_MaP",
+                    experiment_column="experiment_type",
+                    pattern="^reactivity_[0-9]{4}$",
+                    **kwargs
+):
+    """Returns reactivities values for each experiment.
+    filepath should redirect to a cleaned dataframe.
+    """
+    dt = auxiliary.read_dataframe(filepath, **kwargs)
+    y_columns = [colname for colname in dt.columns if re.match(pattern, colname)]
+    values_2A3 = dt[dt[experiment_column] == key_2A3]
+    values_DMS = dt[dt[experiment_column] == key_DMS]
+    # Reactivities
+    reactivities_2A3 = values_2A3[y_columns].to_numpy().flatten()
+    reactivities_DMS = values_DMS[y_columns].to_numpy().flatten()
+
+    return {"2A3": reactivities_2A3, "DMS": reactivities_DMS}
+
+
 if __name__ == "__main__":
     data = pd.read_csv("./data/SN_filtered_train.csv", header=0)
 

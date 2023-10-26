@@ -6,6 +6,7 @@ import os
 import re
 
 import numpy as np
+import pandas as pd
 from sklearn.model_selection import train_test_split
 
 
@@ -93,6 +94,14 @@ def load_npy_xy(x_path, y_path, **kwargs):
             raise Exception("One of the path is invalid")
 
     return x, y
+
+
+def read_dataframe(filepath, **kwargs):
+    """Read a dataframe."""
+    if not isfile(filepath):
+        raise Exception("Filepath is invalid")
+
+    return pd.read_csv(filepath, **kwargs)
 
 
 def min_max(arraylike):
